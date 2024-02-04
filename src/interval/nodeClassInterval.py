@@ -1,7 +1,7 @@
 """
 
 Assumptions:
-    -   pytreeInterval only interacts with pytreeInterval.
+    -   interval only interacts with interval.
     -   lower bound of IntervalArithmetic is lower than greater bound
 
 Operations:

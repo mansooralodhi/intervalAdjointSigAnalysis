@@ -60,7 +60,7 @@ if __name__ == "__main__":
         return jnp.matmul(a, b)
 
     import numpy as np
-    from src.pytreeInterval.registeredInterval import RegisteredInterval
+    from src.interval.registeredInterval import RegisteredInterval
 
     ival = RegisteredInterval(1.0, 2.0)
     ivalA = np.asarray([[ival, ival],

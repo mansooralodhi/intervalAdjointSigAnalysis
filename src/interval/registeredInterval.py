@@ -1,7 +1,7 @@
 
 import jax
 from jax.tree_util import register_pytree_node
-from src.pytreeInterval.interval import Interval
+from src.interval.interval import Interval
 
 
 class RegisteredInterval(Interval):

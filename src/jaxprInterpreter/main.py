@@ -1,7 +1,7 @@
 import jax
 import jax.numpy as jnp
 from functools import wraps
-from src.jaxprInterpreter.invJaxprEvaluator import InverseJaxprEvaluator
+from src.jaxprInterpreter.inverseJaxprEvaluator import InverseJaxprEvaluator
 from src.jaxprInterpreter.defaultJaxprEvaluator import DefaultJaxprEvaluator
 # from src.jaxprInterpreter.intervalJaxprEvaluator import Inter
 
