@@ -1,0 +1,23 @@
+Source: https://jax.readthedocs.io/en/latest/autodidax.html#linearize
+
+Terminology
+-----------
+
+infix operators: add, mul, neg
+primitive operations (atomic processing units): sin, +, -
+
+Concepts
+--------
+
+- "Transform" -> interpret differently
+  Instead of standard interpretation where we apply primitive operations to numerical inputs to produce
+  numerical outputs, we want to override primitive application and let different values flow through our
+  program.
+  Moreover, we want to be able to compose multiple transformations, leading to stacks of interpreters
+
+
+
+
+
+Theory
+------
