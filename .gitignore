@@ -2,3 +2,4 @@
 src/__pycache__/*
 */__pycache__/*
 src/thesis_prototype_v1/jaxFromScratch/__pycache__/
+__pycache__/
