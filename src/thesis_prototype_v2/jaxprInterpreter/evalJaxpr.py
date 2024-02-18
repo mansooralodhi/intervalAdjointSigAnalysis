@@ -1,8 +1,8 @@
 import jax
 import jax.numpy as jnp
 from functools import wraps
-from src.jaxprInterpreter.inverseJaxprEvaluator import InverseJaxprEvaluator
-from src.jaxprInterpreter.defaultJaxprEvaluator import DefaultJaxprEvaluator
+from src.thesis_prototype_v2.jaxprInterpreter.inverse import InverseJaxprEvaluator
+from src.thesis_prototype_v2.jaxprInterpreter.default import DefaultJaxprEvaluator
 # from src.jaxprInterpreter.intervalJaxprEvaluator import Inter
 
 class EvaluateJaxpr(object):

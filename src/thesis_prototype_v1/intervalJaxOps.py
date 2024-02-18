@@ -10,7 +10,7 @@ Note:
     
 Question:   
         How do we implement the model if jax primitive operations don't support 
-        interval ? We cannot only rely on arithmetic operators only.
+        intervals ? We cannot only rely on arithmetic operators only.
 
 Possible Solution:
     -   Replace jax primitive operations with numpy operations.

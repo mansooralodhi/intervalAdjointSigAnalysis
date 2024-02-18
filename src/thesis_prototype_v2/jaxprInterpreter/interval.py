@@ -60,7 +60,7 @@ if __name__ == "__main__":
         return jnp.matmul(a, b)
 
     import numpy as np
-    from src.interval.registeredInterval import RegisteredInterval
+    from src.thesis_prototype_v2.intervals.main import RegisteredInterval
 
     ival = RegisteredInterval(1.0, 2.0)
     ivalA = np.asarray([[ival, ival],
@@ -69,13 +69,11 @@ if __name__ == "__main__":
     arguments = [ivalA, ivalB]
 
     # closed_jaxpr = jax.make_jaxpr(f)(*arguments)
+    # FIXME: make the jax.make_jaxpr work with interval type input.
     closed_jaxpr = jax.make_jaxpr(f)(jnp.ones(1), jnp.ones(1))
     # otuput = IntervalJaxprEvaluator.eval_jaxpr(closed_jaxpr.jaxpr, closed_jaxpr.literals, jnp.ones(5))
     otuput = IntervalJaxprEvaluator.eval_jaxpr(closed_jaxpr.jaxpr, closed_jaxpr.literals, *arguments)
     print(otuput)
-
-
-
 
 
 

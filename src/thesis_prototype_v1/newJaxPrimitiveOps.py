@@ -18,7 +18,7 @@ Note:       New primitives are defined for jax types and not for pytrees,
             order transformations but they will not work with jit.
         
 Question:   With new primitive, 
-            why is jacobian computed with pytree-interval input
+            why is jacobian computed with pytree-intervals input
             but not with simple float input unless all the xla
             implementation is defined ???
 

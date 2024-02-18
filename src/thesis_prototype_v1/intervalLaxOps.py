@@ -3,7 +3,7 @@ from intervalArithmetic import IntervalArithmetic
 
 """
 Note: 
-    -   lax primitive operations doesn't interval or pytree-intervals because it is not traceable.
+    -   lax primitive operations doesn't intervals or pytree-intervals because it is not traceable.
 """
 def multiply_add_lax(x, y, z):
 

@@ -1,7 +1,7 @@
 """
 
 Assumptions:
-    -   interval only interacts with interval.
+    -   intervals only interacts with intervals.
     -   lower bound of IntervalArithmetic is lower than greater bound
 
 Operations:
