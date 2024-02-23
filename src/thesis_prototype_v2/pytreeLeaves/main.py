@@ -26,3 +26,10 @@ print(in_tree)
 # in_avals_flat = spvalues_to_avals(spenv, spvalues_flat)
 # wrapped_fun, out_tree = flatten_fun_nokwargs(lu.wrap_init(f, params), in_tree)
 # jaxpr, out_avals_flat, consts = pe.trace_to_jaxpr_dynamic(wrapped_fun, in_avals_flat)
+
+import jax
+import jax.numpy as jnp
+f = lambda x, y: y * x
+vec = np.asarray([[1., 1., 1.]])
+print(f(vec, vec))
+print(jax.vjp(f, vec, vec))
