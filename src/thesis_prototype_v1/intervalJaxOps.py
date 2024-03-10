@@ -29,7 +29,8 @@ def multiply_add(a, b, c):
     return np.add(np.dot(a, b), c)
 
 
-def operator_multiply_add(a, b, c):
+def operator_multiply_add(a, b, c
+                          ):
     # works
     return a * b + c
 
@@ -63,4 +64,4 @@ def sample_jacfwd():
 if __name__ == "__main__":
     # x = IntervalArithmetic(-1.0, 2.0)
     # y = operator_multiply_add(x, x, x)
-    sample_jacfwd()
+    sample_jvp()

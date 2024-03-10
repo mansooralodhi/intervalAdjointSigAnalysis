@@ -81,3 +81,4 @@ if __name__ == "__main__":
     ivalB = Interval(-1.0, 8.0)
     print(np.add(ivalB, ivalA))
     print(ivalB + ivalA)
+
