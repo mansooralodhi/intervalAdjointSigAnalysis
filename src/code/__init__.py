@@ -53,5 +53,13 @@ input matrices: np.ndarray | jnp.ndarray
 
 NB: At any given instance we are either dealing with floats (jnp.ndarray)
     or with intervals (np.ndarray)
-    
+
+
+Input Array Types
+-----------------
+
+1.  Scalar
+2.  Vector
+3.  Matrix
+
 """

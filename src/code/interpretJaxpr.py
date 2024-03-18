@@ -1,10 +1,6 @@
-
-
-
 """
 """
 """
-
 Input: float | jnp.ndarray
 
 NB: Jaxpr interpret should know if the jnp.ndarray is derived from np.ndarray(dtype=interval).
@@ -30,3 +26,40 @@ NB: Jaxpr interpret should know if the jnp.ndarray is derived from np.ndarray(dt
     2.6 get output from env
     2.7 return output
 """
+
+from jax import core
+from jax._src.util import safe_map
+from src.code.setupRegistry import get_registry
+
+registry = get_registry()
+
+def interpret_jaxpr(jaxpr, consts, *args):
+    env = {}
+
+    def read(var):
+        if type(var) is core.Literal:
+            return var.val
+        return env[var]
+
+    def write(var, val):
+        env[var] = val
+
+    safe_map(write, jaxpr.invars, args)
+    safe_map(write, jaxpr.constvars, consts)
+
+    for eqn in jaxpr.eqns:
+        invals = safe_map(read, eqn.invars)
+
+        if eqn.primitive not in registry:
+            raise NotImplementedError(f"{eqn.primitive} does not have registered interval equivalent.")
+
+        outvals = registry[eqn.primitive](*invals)
+        # outvals = registry[eqn.primitive](*invals, **eqn.params)
+
+        # Primitives may return multiple outputs or not
+        # if eqn.primitive.multiple_results:
+        outvals = [outvals]
+
+        safe_map(write, eqn.outvars, outvals)
+
+    return safe_map(read, jaxpr.outvars)

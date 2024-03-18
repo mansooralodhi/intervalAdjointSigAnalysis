@@ -18,11 +18,10 @@ NB:
 
 import numpy as np
 
-
 class Interval(np.ndarray):
 
     def __new__(cls, x, y):
-        val = np.asarray([x, y])
+        val = np.asarray([x, y], dtype=np.float32)
         obj = super().__new__(cls, shape=val.shape, buffer=val, dtype=np.float32)
         return obj
 
@@ -35,7 +34,8 @@ if __name__ == '__main__':
     print(ivals.shape)
     print(ivals.size)
     print('*' * 35)
-    ivals = np.asarray([ivals, ivals]).view(Interval)
+
+    ivals = np.asarray([ivals, ivals])#.view(Interval)
     print(ivals)
     print(type(ivals))
     print(ivals.dtype)
