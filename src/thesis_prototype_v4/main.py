@@ -1,9 +1,9 @@
 import jax
 import numpy as np
 from functools import wraps
-from src.history.thesis_prototype_v4.interval import Interval
-from src.history.thesis_prototype_v4.buildJaxpr import BuildJaxpr
-from src.history.thesis_prototype_v4.evalJaxpr import EvalJaxpr
+from src.thesis_prototype_v4.interval import Interval
+from src.thesis_prototype_v4.buildJaxpr import BuildJaxpr
+from src.thesis_prototype_v4.evalJaxpr import EvalJaxpr
 
 BuildJaxpr.customDtype.append(Interval)
 

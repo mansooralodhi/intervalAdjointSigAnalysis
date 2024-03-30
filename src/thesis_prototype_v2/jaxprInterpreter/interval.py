@@ -60,7 +60,7 @@ if __name__ == "__main__":
         return jnp.matmul(a, b)
 
     import numpy as np
-    from src.history.thesis_prototype_v2.intervals.main import RegisteredInterval
+    from src.thesis_prototype_v2.intervals.main import RegisteredInterval
 
     ival = RegisteredInterval(1.0, 2.0)
     ivalA = np.asarray([[ival, ival],

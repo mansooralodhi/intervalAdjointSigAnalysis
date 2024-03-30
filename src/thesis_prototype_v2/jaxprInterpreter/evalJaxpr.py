@@ -1,8 +1,8 @@
 import jax
 import jax.numpy as jnp
 from functools import wraps
-from src.history.thesis_prototype_v2.jaxprInterpreter.inverse import InverseJaxprEvaluator
-from src.history.thesis_prototype_v2.jaxprInterpreter.default import DefaultJaxprEvaluator
+from src.thesis_prototype_v2.jaxprInterpreter.inverse import InverseJaxprEvaluator
+from src.thesis_prototype_v2.jaxprInterpreter.default import DefaultJaxprEvaluator
 
 
 # from src.jaxprInterpreter.intervalJaxprEvaluator import Inter

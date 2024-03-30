@@ -6,7 +6,7 @@ from functools import wraps
 from jax import core
 from jax import lax
 from jax._src.util import safe_map
-from src.history.thesis_prototype_v5.buildJaxpr import BuildJaxpr
+from src.thesis_prototype_v5.buildJaxpr import BuildJaxpr
 
 interval_registry = {}
 

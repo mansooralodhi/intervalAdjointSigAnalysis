@@ -18,8 +18,8 @@ Above code accepts both simple number and interval input
 
 import jax
 import jax.numpy as jnp
-from src.history.thesis_prototype_v5.ival import Interval
-from src.history.thesis_prototype_v5.evalJaxpr import EvalJaxpr
+from src.thesis_prototype_v5.ival import Interval
+from src.thesis_prototype_v5.evalJaxpr import EvalJaxpr
 
 
 
