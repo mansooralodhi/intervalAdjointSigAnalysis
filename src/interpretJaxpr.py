@@ -29,7 +29,7 @@ NB: Jaxpr interpret should know if the jnp.ndarray is derived from np.ndarray(dt
 
 from jax import core
 from jax._src.util import safe_map
-from src.code.setupRegistry import get_registry
+from src.setupRegistry import get_registry
 
 registry = get_registry()
 

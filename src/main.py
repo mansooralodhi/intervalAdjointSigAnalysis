@@ -1,6 +1,6 @@
 import jax
 import jax.numpy as np
-from src.code.utils import interval2scalarArgs
+from src.utils import interval2scalarArgs
 from src.code.transformations import ivalTransformation
 
 

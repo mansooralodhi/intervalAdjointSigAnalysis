@@ -1,7 +1,7 @@
 from jax import lax
-from jax._src.ad_util import add_jaxvals_p
 from typing import Dict
-from src.code.ivalOps import *
+from src.ivalOps import *
+from jax._src.ad_util import add_jaxvals_p
 
 
 from jax._src.lax import lax
