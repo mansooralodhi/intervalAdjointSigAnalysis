@@ -33,6 +33,7 @@ from src.code.setupRegistry import get_registry
 
 registry = get_registry()
 
+
 def interpret_jaxpr(jaxpr, consts, *args):
     env = {}
 
@@ -48,13 +49,13 @@ def interpret_jaxpr(jaxpr, consts, *args):
     safe_map(write, jaxpr.constvars, consts)
 
     for eqn in jaxpr.eqns:
+
         invals = safe_map(read, eqn.invars)
 
         if eqn.primitive not in registry:
             raise NotImplementedError(f"{eqn.primitive} does not have registered interval equivalent.")
 
-        outvals = registry[eqn.primitive](*invals)
-        # outvals = registry[eqn.primitive](*invals, **eqn.params)
+        outvals = registry[eqn.primitive](*invals, **eqn.params)
 
         # Primitives may return multiple outputs or not
         # if eqn.primitive.multiple_results:

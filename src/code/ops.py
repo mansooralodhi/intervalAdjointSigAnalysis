@@ -1,13 +1,16 @@
-import numpy as np
+
+
+"""
+Input Argument
+---------------
+1. Float
+2. Intervals with shape (2,)
+3. Vector of intervals each with shape (2,)
+4. Matrix of intervals each with shape (2,)
+
+"""
+
 import jax.numpy as jnp
-
-"""
-Input Array Types
------------------
-1.  Vector
-2.  Matrix
-
-"""
 
 
 def div(x, y):
@@ -21,6 +24,7 @@ def div(x, y):
 
 
 def mul(x, y):
+    # fixme
     if isinstance(x, float) or isinstance(y, float):
         # case in Neils approach
         return x * y
@@ -31,20 +35,24 @@ def mul(x, y):
 
 
 def add(x, y):
+    # fixme
     return jnp.stack((x[..., 0] + y[..., 0], x[..., 1] + y[..., 1]), axis=-1)
 
-
 def sub(x, y):
+    # fixme
     return jnp.stack((x[..., 0] - y[..., 0], x[..., 1] - y[..., 1]), axis=-1)
 
 
 def exp(x):
+    # fixme
     return jnp.stack((jnp.exp(x[..., 0]), jnp.exp(x[..., 1])), axis=-1)
 
 
 def reduce_sum(x):
+    # fixme
     return jnp.asarray([jnp.sum(x[..., 0]), jnp.sum(x[..., 1])])
 
 
 def reduce_max(x):
+    # fixme
     return jnp.asarray([jnp.max(x[..., 0]), jnp.max(x[..., 1])])

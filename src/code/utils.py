@@ -2,11 +2,24 @@
 
 import jax
 import jax.numpy as jnp
-from typing import Sequence, Optional, TypedDict, Dict
+from typing import Sequence, Optional, TypedDict, List, Tuple, Union
 
 class Gradients(TypedDict):
     lowerBound: float
     upperBound: float
+
+
+def interval2scalarArgs(ivalArgs: Union[List, Tuple]):
+    """
+    i.e. f(x1, x2, ...)
+    Args:
+        ivalArgs: (x1, x2, ...)
+    Return:
+        scalarArgs: [jnp.array(1.0), jnp.array(1.0), ...]
+    """
+    scalarArgs = [jnp.array(1.0) for _ in ivalArgs]
+    return scalarArgs
+
 
 def jacobian2grad(jacobian: jnp.ndarray) -> Gradients:
     """
