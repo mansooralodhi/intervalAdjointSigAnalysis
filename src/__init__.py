@@ -11,7 +11,7 @@ Algorithm
             1.1 args -> tree_flatten() -> args_flat
             1.2 args_flat -> to_avlas() -> args_flat_abs
             1.3 f -> flatten_fun_args() -> f_flat
-            1.4 f_flat, args_flat_abs -> trace_jaxpr() -> jaxpr
+            1.4 f_flat, args_flat_abs -> trace_jaxpr() -> reinterpretJaxpr
         2.  interpret_jaxpr
             2.1 preliminaries:
                 2.1.1 write jax primitive ops for interval inputs
@@ -20,7 +20,7 @@ Algorithm
             2.2 create env
             2.3 store variable values in env
             2.4 store constants values in env
-            2.5 find eqn in jaxpr
+            2.5 find eqn in reinterpretJaxpr
                 2.5.1 get values from env
                 2.5.2 get method from registry 
                 2.5.3 get output 

@@ -1,6 +1,6 @@
 import jax
 from functools import wraps
-from src.interpretJaxpr import interpret_jaxpr
+from src.history.reinterpretJaxpr.interpretJaxpr import interpret_jaxpr
 
 
 def ivalTransformation(fun):

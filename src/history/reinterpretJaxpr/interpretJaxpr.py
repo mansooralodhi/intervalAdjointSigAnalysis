@@ -18,7 +18,7 @@ NB: Jaxpr interpret should know if the jnp.ndarray is derived from np.ndarray(dt
     2.2 create env
     2.3 store variable values in env
     2.4 store constants values in env
-    2.5 find eqn in jaxpr
+    2.5 find eqn in reinterpretJaxpr
         2.5.1 get values from env
         2.5.2 get method from registry 
         2.5.3 get output 
@@ -29,7 +29,7 @@ NB: Jaxpr interpret should know if the jnp.ndarray is derived from np.ndarray(dt
 
 from jax import core
 from jax._src.util import safe_map
-from src.setupRegistry import get_registry
+from src.history.reinterpretJaxpr.setupRegistry import get_registry
 
 registry = get_registry()
 
