@@ -1,134 +1,45 @@
 
-import numpy as np
-from jax.tree_util import tree_map
-from torch.utils import data
-from torchvision.datasets import mnist
-import jax.numpy as jnp
-from jax import grad, jit, vmap
-from jax import random
-from jax.scipy.special import logsumexp
 
-###################################  Model Hyperparameters ##################################
+from src.dataset import Dataset
+from src.dataloader import Dataloader
+from src.neuralNet import NeuralNet
+from src.optimizer import adam_optimzer
+from src.trainer import train_model
 
-# A helper function to randomly initialize weights and biases
-# for a dense neural network layer
-def random_layer_params(m, n, key, scale=1e-2):
-  w_key, b_key = random.split(key)
-  return scale * random.normal(w_key, (n, m)), scale * random.normal(b_key, (n,))
-
-# Initialize all layers for a fully-connected neural network with sizes "sizes"
-def init_network_params(sizes, key):
-  keys = random.split(key, len(sizes))
-  return [random_layer_params(m, n, k) for m, n, k in zip(sizes[:-1], sizes[1:], keys)]
-
-layer_sizes = [784, 512, 512, 10]
-step_size = 0.01
-num_epochs = 8
-batch_size = 128
-n_targets = 10
-params = init_network_params(layer_sizes, random.key(0))
-
-################################### Auto-Batch Prediction ####################################
-
-def relu(x):
-    return jnp.maximum(0, x)
-
-def predict(params, image):
-    # per-example predictions
-    activations = image
-    for w, b in params[:-1]:
-        outputs = jnp.dot(w, activations) + b
-        activations = relu(outputs)
-    final_w, final_b = params[-1]
-    logits = jnp.dot(final_w, activations) + final_b
-    return logits - logsumexp(logits)
-
-# random_flattened_images = random.normal(random.key(1), (10, 28 * 28))
-# preds = predict(params, random_flattened_images) # doesn't work
-batched_predict = vmap(predict, in_axes=(None, 0))
-# batched_preds = batched_predict(params, random_flattened_images) # does work
-
-
-############################### Utility and loss Function ##################################
-
-def one_hot(x, k, dtype=jnp.float32):
-    """Create a one-hot encoding of x of size k."""
-    return jnp.array(x[:, None] == jnp.arange(k), dtype)
-
-def accuracy(params, images, targets):
-    target_class = jnp.argmax(targets, axis=1)
-    predicted_class = jnp.argmax(batched_predict(params, images), axis=1)
-    return jnp.mean(predicted_class == target_class)
-
-def loss(params, images, targets):
-    preds = batched_predict(params, images)
-    return -jnp.mean(preds * targets)
-
-@jit
-def update(params, x, y):
-    grads = grad(loss)(params, x, y)
-    return [(w - step_size * dw, b - step_size * db)
-            for (w, b), (dw, db) in zip(params, grads)]
-
-
-##################################### DataLoading with Pytorch #########################
-
-import numpy as np
-from jax.tree_util import tree_map
-from torch.utils import data
+import jax
+from pathlib import Path
+from flax.training import train_state
+from flax.training import checkpoints
 from torchvision.datasets import MNIST
 
-def numpy_collate(batch):
-  return tree_map(np.asarray, data.default_collate(batch))
 
-class NumpyLoader(data.DataLoader):
-  def __init__(self, dataset, batch_size=1,
-                shuffle=False, sampler=None,
-                batch_sampler=None, num_workers=0,
-                pin_memory=False, drop_last=False,
-                timeout=0, worker_init_fn=None):
-    super(self.__class__, self).__init__(dataset,
-        batch_size=batch_size,
-        shuffle=shuffle,
-        sampler=sampler,
-        batch_sampler=batch_sampler,
-        num_workers=num_workers,
-        collate_fn=numpy_collate,
-        pin_memory=pin_memory,
-        drop_last=drop_last,
-        timeout=timeout,
-        worker_init_fn=worker_init_fn)
+trainData = MNIST(root='data/mnist', download=True, train=True)
+testData = MNIST(root='data/mnist', download=True, train=False)
 
-class FlattenAndCast(object):
-  def __call__(self, pic):
-    return np.ravel(np.array(pic, dtype=jnp.float32))
+batch_size = 128
+trainDataset = Dataset(trainData)
+trainDataloader = Dataloader(trainDataset, batch_size=batch_size)
+testDataset = Dataset(testData)
+testDataloader = Dataloader(testDataset, batch_size=batch_size)
 
-# Define our dataset, using torch datasets
-mnist_dataset = MNIST('/tmp/mnist/', download=True, transform=FlattenAndCast())
-training_generator = NumpyLoader(mnist_dataset, batch_size=batch_size, num_workers=0)
+learning_rate = 0.01
+model = NeuralNet()
+inpSample = trainDataset[0][0]
+key = jax.random.key(0)
+model_params_dict = model.init(key, inpSample)
+print(jax.make_jaxpr())
+model_state = train_state.TrainState.create(apply_fn=model.apply, params=model_params_dict, tx=adam_optimzer(learning_rate))
 
-# Get the full train dataset (for checking accuracy while training)
-train_images = np.array(mnist_dataset.train_data).reshape(len(mnist_dataset.train_data), -1)
-train_labels = one_hot(np.array(mnist_dataset.train_labels), n_targets)
+epochs=5
+train_output_dict = train_model(model_state, trainDataloader, testDataloader, num_epochs=epochs)
+trained_model = train_output_dict.get('model_state')
 
-# Get full test dataset
-mnist_dataset_test = MNIST('/tmp/mnist/', download=True, train=False)
-test_images = jnp.array(mnist_dataset_test.test_data.numpy().reshape(len(mnist_dataset_test.test_data), -1), dtype=jnp.float32)
-test_labels = one_hot(np.array(mnist_dataset_test.test_labels), n_targets)
-
-####################################### Training ###########################################
-
-import time
-
-for epoch in range(num_epochs):
-  start_time = time.time()
-  for x, y in training_generator:
-    y = one_hot(y, n_targets)
-    params = update(params, x, y)
-  epoch_time = time.time() - start_time
-
-  train_acc = accuracy(params, train_images, train_labels)
-  test_acc = accuracy(params, test_images, test_labels)
-  print("Epoch {} in {:0.2f} sec".format(epoch, epoch_time))
-  print("Training set accuracy {}".format(train_acc))
-  print("Test set accuracy {}".format(test_acc))
+cwd = Path.cwd()
+model_file = cwd.as_posix() + '/checkpoints'
+checkpoints.save_checkpoint(
+    ckpt_dir=model_file,  # Folder to save checkpoint in
+    target=trained_model,  # What to save. To only save parameters, use model_state.params
+    step=1,  # Training step or other metric to save best model on
+    prefix="my_model",  # Checkpoint file name prefix
+    overwrite=True,  # Overwrite existing checkpoint files
+)
