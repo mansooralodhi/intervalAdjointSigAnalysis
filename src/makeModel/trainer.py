@@ -1,10 +1,9 @@
 import jax
-import numpy as np
-import jax.numpy as jnp
 import optax
-from tqdm import tqdm
-from flax.training.train_state import TrainState
 import torch
+from tqdm import tqdm
+import jax.numpy as jnp
+from flax.training.train_state import TrainState
 
 @jax.jit
 def loss_accu_fn(x: torch.Tensor, y: torch.Tensor, params_dict: dict[str], model_state: TrainState) -> tuple[jax.Array, jax.Array]:
@@ -76,6 +75,12 @@ def train_model(model_state: TrainState, trainDataloader, testDataloader, num_ep
             testLoss:     list
     """
 
+    # todo:
+    #   (1) make Trainer class and add train_model in it
+    #   (2) save the loss and accuracy with model checkpoint
+    #   (3) save multiple checkpoints with best accuracies
+    #   (4) add tensorboard feature to monitor loss and accuracy,
+
     training_accuracy = []
     training_loss = []
 
@@ -84,28 +89,28 @@ def train_model(model_state: TrainState, trainDataloader, testDataloader, num_ep
 
     # Training loop
     for epoch in tqdm(range(num_epochs)):
-        train_batch_loss, train_batch_accuracy = [], []
-        val_batch_loss, val_batch_accuracy = [], []
+        val_batch_loss, val_batch_accuracy = 0, 0
+        train_batch_loss, train_batch_accuracy = 0, 0
 
         for x, y in trainDataloader:
             x, y = jnp.asarray(x), jnp.asarray(y)
             model_state, loss, acc = train_step(x, y, model_state)
-            train_batch_loss.append(loss)
-            train_batch_accuracy.append(acc)
+            train_batch_loss += loss
+            train_batch_accuracy += acc
 
         for x, y in testDataloader:
             x, y = jnp.asarray(x), jnp.asarray(y)
             val_loss, val_acc = eval_step(x, y, model_state)
-            val_batch_loss.append(val_loss)
-            val_batch_accuracy.append(val_acc)
+            val_batch_loss += val_loss
+            val_batch_accuracy += val_acc
 
         # Loss for the current epoch
-        epoch_train_loss = np.mean(train_batch_loss)
-        epoch_val_loss = np.mean(val_batch_loss)
+        epoch_train_loss = train_batch_loss / len(trainDataloader)
+        epoch_val_loss = val_batch_loss / len(testDataloader)
 
         # Accuracy for the current epoch
-        epoch_train_acc = np.mean(train_batch_accuracy)
-        epoch_val_acc = np.mean(val_batch_accuracy)
+        epoch_train_acc = train_batch_accuracy / len(trainDataloader)
+        epoch_val_acc = val_batch_accuracy / len(testDataloader)
 
         testing_loss.append(epoch_val_loss)
         testing_accuracy.append(epoch_val_acc)
@@ -117,5 +122,4 @@ def train_model(model_state: TrainState, trainDataloader, testDataloader, num_ep
 
     return dict(model_state=model_state, trainAccuracy=training_accuracy, trainLoss=training_loss,
                 testAccuracy=testing_accuracy, testLoss=testing_loss)
-
 

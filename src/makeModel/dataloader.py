@@ -27,7 +27,7 @@ class Dataloader(data.DataLoader):
 
 if __name__ == "__main__":
     from torchvision.datasets import MNIST
-    from src.dataset import Dataset
+    from src.makeModel.dataset import Dataset
 
     trainData = MNIST(root='data/mnist', download=True, train=True)
     dataset = Dataset(trainData)
