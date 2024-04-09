@@ -25,15 +25,68 @@ NB: Jaxpr interpret should know if the jnp.ndarray is derived from np.ndarray(dt
     2.7 return output
 """
 
-import jax
-from jax import core
+from src.customInterpreter.registry import ops_mapping
 from jax.custom_derivatives import custom_jvp_call_p
 from jax.experimental.pjit import pjit_p
-from src.customInterpreter.registry import ops_mapping
+from jax._src.util import safe_map
+from jax import core
+import jax
+
 
 registry = ops_mapping()
 
+############################### Nested (SafeMap Based) Forward Interpreter ############################
 
+def safe_forward_interpret(jaxpr: jax.make_jaxpr, consts: list, *args: tuple) -> object:
+    """
+    jaxpr attributes:
+        constvars | invars | eqns (iterated) | outvars (ignored)
+    consts:
+        list of static params/weights
+    args:
+        tuple[...]
+        len(args) == len(jaxpr.invars)
+    """
+    env = {}
+
+    def write(vars, args):
+        env[vars] = args
+
+    def read(vars):
+        val = vars.val if type(vars) is core.Literal else env[vars]
+        return val
+
+    # iteratively calls write function for each element of len(const)
+    safe_map(write, jaxpr.invars, args)
+    safe_map(write, jaxpr.constvars, consts)
+
+    for eqn in jaxpr.eqns:
+
+        inVarValues = safe_map(read, eqn.invars)
+
+        if eqn.primitive == custom_jvp_call_p:
+            sub_closedJaxpr = eqn.params['call_jaxpr']
+            outVarValues = forward_interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
+            outVarValues = outVarValues if isinstance(outVarValues, list|tuple) else [outVarValues]
+            safe_map(write, eqn.outvars, outVarValues)
+
+        elif eqn.primitive == pjit_p:
+            sub_closedJaxpr = eqn.params['jaxpr']
+            outVarValues = forward_interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
+            return outVarValues
+
+        elif eqn.primitive in registry:
+            outVarValues = registry[eqn.primitive](*inVarValues, **eqn.params)
+            outVarValues = outVarValues if isinstance(outVarValues, list|tuple) else [outVarValues]
+            safe_map(write, eqn.outvars, outVarValues)
+
+        else:
+            raise NotImplementedError(f"{eqn.primitive} does not have registered interval equivalent.")
+
+    output = safe_map(read, jaxpr.outvars)
+    return output
+
+###################################### Plain Forward Interpreter ######################################
 
 def forward_interpret(jaxpr: jax.make_jaxpr, consts: list, *args: tuple) -> object:
     """
@@ -98,46 +151,3 @@ def forward_interpret(jaxpr: jax.make_jaxpr, consts: list, *args: tuple) -> obje
     return output
 
 
-################################## None-Recursive Interpreter in OOP ########################
-# class Interpreter(object):
-#
-#     def __init__(self):
-#         self.env = dict()
-#         self.registry = ops_mapping()
-#
-#     def reset(self):
-#         self.env = dict()
-#
-#     def read(self, var):
-#         if type(var) is core.Literal:
-#             return var.val
-#         return self.env[var]
-#
-#     def write(self, var, val):
-#         self.env[var] = val
-#
-#     def interpret(self, jaxpr, consts, *args):
-#
-#         safe_map(self.write, jaxpr.invars, args)
-#         safe_map(self.write, jaxpr.constvars, consts)
-#
-#         for eqn in jaxpr.eqns:
-#
-#             invals = safe_map(self.read, eqn.invars)
-#
-#             if eqn.primitive not in self.registry:
-#                 raise NotImplementedError(f"{eqn.primitive} does not have registered interval equivalent.")
-#
-#             outvals = self.registry[eqn.primitive](*invals, **eqn.params)
-#
-#             # Primitives may return multiple outputs or not
-#             # if eqn.primitive.multiple_results:
-#             outvals = [outvals]
-#
-#             safe_map(self.write, eqn.outvars, outvals)
-#
-#         output = safe_map(self.read, jaxpr.outvars)
-#
-#         self.reset()
-#
-#         return output
