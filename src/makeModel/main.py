@@ -43,6 +43,6 @@ checkpoints.save_checkpoint(
     ckpt_dir=model_file,  # Folder to save checkpoint in
     target=ckpt,  # What to save. To only save parameters, use model_state.params
     step=0,  # Training step or other metric to save best model on
-    prefix="ckpt_1.",  # Checkpoint file name prefix
+    prefix="ckpt_3.",  # Checkpoint file name prefix
     overwrite=True,  # Overwrite existing checkpoint files
 )

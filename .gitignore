@@ -1,6 +1,3 @@
 .idea/*
-src/__pycache__/*
-*/__pycache__/*
-src/history/thesis_prototype_v1/jaxFromScratch/__pycache__/
 __pycache__/
-checkpoints/*
+checkpoints/

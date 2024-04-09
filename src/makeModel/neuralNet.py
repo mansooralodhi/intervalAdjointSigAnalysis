@@ -12,6 +12,11 @@ Dense(dim=n)(input=x):
 
 
 class NeuralNet(linen.Module):
+    """
+    using nn.linen.compact would set default layer/kernel names
+    else the name of layer would be set according to the name of
+    the variable name using in setup method.
+    """
     n_targets = 10
 
     @linen.compact
@@ -20,3 +25,4 @@ class NeuralNet(linen.Module):
         x = linen.relu(x)
         x = linen.Dense(self.n_targets)(x)
         return x
+
