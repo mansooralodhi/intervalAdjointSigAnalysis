@@ -5,7 +5,7 @@ from tqdm import tqdm
 import jax.numpy as jnp
 from flax.training.train_state import TrainState
 
-# @jax.jit
+@jax.jit
 def loss_accu_fn(x: torch.Tensor, y: torch.Tensor, params_dict: dict[str], model_state: TrainState) -> tuple[jax.Array, jax.Array]:
     """
     NB: we need params_dict separately in order to find gradient w.r.t argument.
@@ -27,7 +27,7 @@ def loss_accu_fn(x: torch.Tensor, y: torch.Tensor, params_dict: dict[str], model
     accu = jnp.mean(y_predicted == y)                            # ()
     return loss, accu
 
-# @jax.jit
+@jax.jit
 def train_step(x: torch.Tensor, y: torch.Tensor, model_state: TrainState) -> tuple[TrainState, jax.Array, jax.Array]:
     """
     Args:
@@ -43,7 +43,7 @@ def train_step(x: torch.Tensor, y: torch.Tensor, model_state: TrainState) -> tup
     model_state = model_state.apply_gradients(grads=grads)
     return model_state, loss, acc
 
-# @jax.jit
+@jax.jit
 def eval_step(x: torch.Tensor, y:torch.Tensor, model_state: TrainState) -> tuple[jax.Array, jax.Array]:
     """
     Args:

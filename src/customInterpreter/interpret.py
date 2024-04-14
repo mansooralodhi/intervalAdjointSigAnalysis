@@ -37,7 +37,7 @@ registry = ops_mapping()
 
 ############################### Nested (SafeMap Based) Forward Interpreter ############################
 
-def safe_forward_interpret(jaxpr: jax.make_jaxpr, consts: list, *args: tuple) -> object:
+def safe_interpret(jaxpr: jax.make_jaxpr, consts: list, *args: tuple) -> object:
     """
     jaxpr attributes:
         constvars | invars | eqns (iterated) | outvars (ignored)
@@ -66,13 +66,13 @@ def safe_forward_interpret(jaxpr: jax.make_jaxpr, consts: list, *args: tuple) ->
 
         if eqn.primitive == custom_jvp_call_p:
             sub_closedJaxpr = eqn.params['call_jaxpr']
-            outVarValues = forward_interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
+            outVarValues = interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
             outVarValues = outVarValues if isinstance(outVarValues, list|tuple) else [outVarValues]
             safe_map(write, eqn.outvars, outVarValues)
 
         elif eqn.primitive == pjit_p:
             sub_closedJaxpr = eqn.params['jaxpr']
-            outVarValues = forward_interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
+            outVarValues = interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
             return outVarValues
 
         elif eqn.primitive in registry:
@@ -88,7 +88,7 @@ def safe_forward_interpret(jaxpr: jax.make_jaxpr, consts: list, *args: tuple) ->
 
 ###################################### Plain Forward Interpreter ######################################
 
-def forward_interpret(jaxpr: jax.make_jaxpr, consts: list, *args: tuple) -> object:
+def interpret(jaxpr: jax.make_jaxpr, consts: list, *args: tuple) -> object:
     """
     jaxpr attributes:
         constvars | invars | eqns (iterated) | outvars (ignored)
@@ -120,7 +120,7 @@ def forward_interpret(jaxpr: jax.make_jaxpr, consts: list, *args: tuple) -> obje
 
         if eqn.primitive == custom_jvp_call_p:
             sub_closedJaxpr = eqn.params['call_jaxpr']
-            outVarValues = forward_interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
+            outVarValues = interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
             # write output variable values in env
             for var, val in zip(eqn.outvars, outVarValues):
                 env[var] = val
@@ -128,7 +128,7 @@ def forward_interpret(jaxpr: jax.make_jaxpr, consts: list, *args: tuple) -> obje
 
         elif eqn.primitive == pjit_p:
             sub_closedJaxpr = eqn.params['jaxpr']
-            outVarValues = forward_interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
+            outVarValues = interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
             return outVarValues
 
         elif eqn.primitive in registry:

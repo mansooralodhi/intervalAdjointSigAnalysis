@@ -31,12 +31,13 @@ NB: the only place where we have params is the model itself, hence,
 class Runtime(object):
     # fixme: use relative path and find the relative file.
     def __init__(self, model_file="D:/TGGS/Stce/repositories/intervalAdjointSigAnalysis/src/makeModel/checkpoints"
-                                  "/ckpt_2.0/checkpoint"):
+                                  "/ckpt_3.0/checkpoint"):
         self.model_file = model_file
         self.model = None
         self.model_params = None
         self.sampleX = None
         self.sampleY = None
+        self.feature_intervals = None
         self.load_model_params()
 
     def predict(self, x):
@@ -57,6 +58,7 @@ class Runtime(object):
         self.model_params = restored_dict.get("model_params")
         self.sampleX = restored_dict.get("x")
         self.sampleY = restored_dict.get("y")
+        self.feature_intervals = restored_dict.get("feature_intervals")
         print("Model Loaded.")
 
 
@@ -68,3 +70,5 @@ if __name__ == "__main__":
     runtime.load_model_params()
     loss = runtime.loss(runtime.sampleX, runtime.model_params)
     print(loss)
+    print(runtime.sampleX.shape)
+    print(runtime.feature_intervals.shape)

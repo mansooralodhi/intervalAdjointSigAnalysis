@@ -35,7 +35,9 @@ epochs = 1
 train_output_dict = train_model(model_state, trainDataloader, testDataloader, num_epochs=epochs)
 trained_model = train_output_dict.get('model_state')
 
-ckpt = dict(model_params=trained_model.params, x=jax.numpy.asarray(x), y=jax.numpy.asarray(y))
+ckpt = dict(model_params=trained_model.params, x=jax.numpy.asarray(x), y=jax.numpy.asarray(y),
+            feature_intervals=trainDataset.feature_intervals())
+
 
 # fixme: put this checkpoint code in Trainer class
 model_file = Path.cwd().as_posix() + '/checkpoints'

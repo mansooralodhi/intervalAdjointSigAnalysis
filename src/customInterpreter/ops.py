@@ -10,7 +10,7 @@ NB:
 """
 
 
-################################### Arithmetic Operations #########################
+############################## Arithmetic Operations ############################
 
 def add(x, y):
     return jnp.add(x, y)
@@ -24,7 +24,7 @@ def max(x, y):
 def gt(x, y):
     return jnp.greater(x, y)
 
-################################### Reduction/Expansion Operations ##################
+########################### Reduction/Expansion Operations ####################
 
 def select_n(which, *cases):
     return jnp.choose(which.astype("int"), cases)
