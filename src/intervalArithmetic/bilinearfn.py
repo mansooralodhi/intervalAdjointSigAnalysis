@@ -1,24 +1,5 @@
-
-
 """"""
-""" Docs
 
-Bilinear Function
------------------
-A function of two variables is bilinear if it is linear with respect to each of its variables. 
-The simplest example is f(x,y)=xy.
-np.multiply: 
-np.inner:
-np.outer:
-np.matmul: 
-np.dot: 
-np.tensordot: 
-np.einsum: 
-
-https://stackoverflow.com/questions/41870228/understanding-tensordot
-https://stackoverflow.com/questions/26089893/understanding-numpys-einsum
-
-"""
 
 from functools import reduce
 

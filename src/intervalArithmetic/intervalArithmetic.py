@@ -1,17 +1,19 @@
-
-
-
 from functools import partial
 from typing import Union, Callable
-from src.intervalArithmetic.intervalArithmetic_utils import *
+from src.intervalArithmetic.bilinearfn import custom_bilinear
 from src.intervalArithmetic.numpyLike import (NDArray, NDArrayLike, Interval, IntervalLike, NumpyLike)
+
+"""
+Source: https://github.com/google/autobound/blob/3013a1030834b686f1bbb97ac9c2d825e51b0b7d/autobound/interval_arithmetic.py#L285
+"""
+
 
 class IntervalArithmetic():
 
     def __init__(self, np_like: NumpyLike):
         self.np_like = np_like
 
-    ########################### Transformation Operations ####################
+    ### Transformation Operations ###
 
     def as_interval(self, a: IntervalLike) -> Interval:
         return self.np_like.asarray(a[0]), self.np_like.asarray(a[1])
@@ -21,7 +23,7 @@ class IntervalArithmetic():
             return self.as_interval(a)
         return self.np_like.asarray(a)
 
-    ############################# Attribute Operations #######################
+    ### Attribute Operations ###
 
     def shape(self, a: Union[NDArrayLike, IntervalLike]) -> tuple:
         if isinstance(a, tuple):
@@ -33,7 +35,7 @@ class IntervalArithmetic():
             return self.np_like.ndim(a[0])
         return self.np_like.ndim(a)
 
-    ############################## Arithmetic Operations ######################
+    ### Arithmetic Operations ###
 
     def negative(self, a: Union[NDArrayLike, IntervalLike]) -> Union[NDArray, Interval]:
         if isinstance(a, tuple):
@@ -107,7 +109,7 @@ class IntervalArithmetic():
 
         return custom_bilinear(a, b, bilinear, assume_product, self.np_like)
 
-    ########################### Reduction/Expansion Operations ################
+    ### Reduction/Expansion Operations ###
 
 
 

@@ -27,6 +27,5 @@ print(f"Actual Loss: {loss}\n"
 grad = modelGrads.grad_wrt_inputs()
 expr = modelJaxpr.grad_jaxpr_wrt_inputs()
 estimated_grad = safe_interpret(expr.jaxpr, expr.literals, x)
-
 print(f"Actual Grad: {grad[0]}\n"
       f"Interpreted Grad: {estimated_grad[0][0]}\n")
