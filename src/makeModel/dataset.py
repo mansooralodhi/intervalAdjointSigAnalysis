@@ -20,7 +20,7 @@ class Dataset(data.Dataset):
         lowerBounds = X.min(axis=0)
         upperBounds = X.max(axis=0)
         ivals = jnp.vstack((lowerBounds, upperBounds))
-        ivals = jnp.moveaxis(ivals, 0, 1)
+        # ivals = jnp.moveaxis(ivals, 1, 0)
         return ivals
 
 

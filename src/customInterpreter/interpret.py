@@ -77,7 +77,9 @@ def safe_interpret(jaxpr: jax.make_jaxpr, consts: list, *args: tuple) -> object:
 
         elif eqn.primitive in registry:
             outVarValues = registry[eqn.primitive](*inVarValues, **eqn.params)
-            outVarValues = outVarValues if isinstance(outVarValues, list|tuple) else [outVarValues]
+            # the below statement write the lb and ub twice:
+            # outVarValues = outVarValues if isinstance(outVarValues, list|tuple) else [outVarValues]
+            outVarValues = [outVarValues]
             safe_map(write, eqn.outvars, outVarValues)
 
         else:

@@ -13,7 +13,7 @@ class IntervalArithmetic():
     def __init__(self, np_like: NumpyLike):
         self.np_like = np_like
 
-    ### Transformation Operations ###
+    ##################################### Transformation Operations ########################
 
     def as_interval(self, a: IntervalLike) -> Interval:
         return self.np_like.asarray(a[0]), self.np_like.asarray(a[1])
@@ -23,7 +23,7 @@ class IntervalArithmetic():
             return self.as_interval(a)
         return self.np_like.asarray(a)
 
-    ### Attribute Operations ###
+    ###################################### Attribute Operations ##############################
 
     def shape(self, a: Union[NDArrayLike, IntervalLike]) -> tuple:
         if isinstance(a, tuple):
@@ -35,7 +35,30 @@ class IntervalArithmetic():
             return self.np_like.ndim(a[0])
         return self.np_like.ndim(a)
 
-    ### Arithmetic Operations ###
+    ###################################### Condition Operations ##############################
+
+    def maximum(self, a: Union[NDArrayLike, IntervalLike], b: NDArray) -> Union[NDArray, Interval]:
+        if isinstance(a, tuple):
+            if isinstance(b, NDArray) and b.shape == ():
+                return self.np_like.maximum(a[0], b), self.np_like.maximum(a[1], b)
+            else:
+                raise NotImplementedError(b)
+        return self.np_like.maximum(a, b)
+
+    def greater_than(self, a: Union[NDArrayLike, IntervalLike], b: NDArray) -> Union[NDArray, Interval]:
+        if isinstance(a, tuple):
+            if isinstance(b, NDArray) and b.shape == ():
+                return self.np_like.greater(a[0], b), self.np_like.greater(a[1], b)
+            else:
+                raise NotImplementedError(b)
+        return self.np_like.greater(a, b)
+
+    def choose(self, which: Union[NDArrayLike, IntervalLike], *cases) ->  Union[NDArrayLike, IntervalLike]:
+        if isinstance(which, tuple):
+            return self.np_like.choose(which[0].astype('int'), cases), self.np_like.choose(which[1].astype('int'), cases)
+        return self.np_like.choose(which.astype('int'), cases)
+
+    ####################################### Arithmetic Operations ############################
 
     def negative(self, a: Union[NDArrayLike, IntervalLike]) -> Union[NDArray, Interval]:
         if isinstance(a, tuple):
@@ -79,23 +102,21 @@ class IntervalArithmetic():
     def multiply(self, a: Union[NDArrayLike, IntervalLike], b: Union[NDArrayLike, IntervalLike]) -> Union[NDArray, Interval]:
         return self._arbitrary_bilinear(a, b, self.np_like.multiply, assume_product=True)
 
+    def divide(self, a: Union[NDArrayLike, IntervalLike], b: NDArray) -> Union[NDArray, Interval]:
+        if isinstance(a, tuple):
+            if isinstance(b, NDArray) and b.shape == ():
+                return self.np_like.divide(a[0], b), self.np_like.divide(a[1], b)
+            else:
+                raise NotImplementedError(b)
+        return self.np_like.divide(a, b)
+
     def tensordot(self, a: Union[NDArrayLike, IntervalLike], b: Union[NDArrayLike, IntervalLike], axes) -> Union[NDArray, Interval]:
         bilinear = partial(self.np_like.tensordot, axes=axes)
         return self._arbitrary_bilinear(a, b, bilinear, assume_product = axes==0)
 
-    # todo
     def outer_product(self, a: Union[NDArrayLike, IntervalLike], b: Union[NDArrayLike, IntervalLike], batch_dims: int = 0) -> Union[NDArray, Interval]:
         """Interval variant of _ndarray_outer_product()."""
-        pass
-
-    # todo
-    def outer_power(self, a: Union[NDArrayLike, IntervalLike], exponent: int, batch_dims: int = 0) -> Union[NDArray, Interval]:
-        """Returns a repeated outer product."""
-        pass
-
-    # todo
-    def power(self, a: Union[NDArrayLike, IntervalLike], exponent: int, batch_dims: int = 0) -> Union[NDArray, Interval]:
-        """Returns a**exponent (element-wise)."""
+        # todo
         pass
 
     def _arbitrary_bilinear(self, a: Union[NDArrayLike, IntervalLike], b: Union[NDArrayLike, IntervalLike],
@@ -109,7 +130,24 @@ class IntervalArithmetic():
 
         return custom_bilinear(a, b, bilinear, assume_product, self.np_like)
 
-    ### Reduction/Expansion Operations ###
+    ##################################### Log/Exp/Power Operations ############################
+
+    def outer_power(self, a: Union[NDArrayLike, IntervalLike], exponent: int, batch_dims: int = 0) -> Union[NDArray, Interval]:
+        """Returns a repeated outer product."""
+        # todo
+        pass
+
+    def power(self, a: Union[NDArrayLike, IntervalLike], exponent: int, batch_dims: int = 0) -> Union[NDArray, Interval]:
+        """Returns a**exponent (element-wise)."""
+        # todo
+        pass
+
+    ##################################### Reduction/Expansion Operations #######################
+
+    def sum(self, a: Union[NDArrayLike, IntervalLike], axis: int = 0):
+        if isinstance(a, tuple):
+            return self.np_like.sum(a[0], axis), self.np_like.sum(a[1], axis)
+        return self.np_like.sum(a, axis)
 
 
 
