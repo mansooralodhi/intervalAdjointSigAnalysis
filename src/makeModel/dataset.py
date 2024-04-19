@@ -19,7 +19,7 @@ class Dataset(data.Dataset):
         X = X.reshape(X.shape[0], jnp.prod(jnp.array(X.shape[1:])))
         lowerBounds = X.min(axis=0)
         upperBounds = X.max(axis=0)
-        ivals = jnp.vstack((lowerBounds, upperBounds))
+        ivals = jnp.vstack((lowerBounds, upperBounds)) # (2,
         # ivals = jnp.moveaxis(ivals, 1, 0)
         return ivals
 

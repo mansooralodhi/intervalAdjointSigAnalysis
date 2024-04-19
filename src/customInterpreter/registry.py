@@ -5,8 +5,7 @@ from jax import lax
 from typing import Dict
 from jax._src.ad_util import add_jaxvals_p
 
-# from src.customInterpreter.ops import *
-from src.intervalArithmetic.ops import *
+from src.customInterpreter.ops import *
 
 def ops_mapping() -> Dict:
 

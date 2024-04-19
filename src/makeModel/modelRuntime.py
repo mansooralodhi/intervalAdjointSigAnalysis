@@ -28,7 +28,7 @@ NB: the only place where we have params is the model itself, hence,
 """
 
 
-class Runtime(object):
+class ModelRuntime(object):
     # fixme: use relative path and find the relative file.
     def __init__(self, model_file="D:/TGGS/Stce/repositories/intervalAdjointSigAnalysis/src/makeModel/checkpoints"
                                   "/ckpt_3.0/checkpoint"):
@@ -45,6 +45,7 @@ class Runtime(object):
         return jax.numpy.argmax(scores, -1)
 
     def loss(self, x=None, model_params=None):
+        # todo: use some better loss function than mean.
         scores = self.model(model_params, x)
         return scores.mean()
 
@@ -66,7 +67,7 @@ class Runtime(object):
 
 
 if __name__ == "__main__":
-    runtime = Runtime()
+    runtime = ModelRuntime()
     runtime.load_model_params()
     loss = runtime.loss(runtime.sampleX, runtime.model_params)
     print(loss)

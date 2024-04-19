@@ -1,15 +1,15 @@
 
 
 
-from src.makeModel.runtime import Runtime
-from src.makeModel.jaxpr import ModelJaxpr
-from src.makeModel.grads import ModelGrad
+from src.makeModel.modelRuntime import ModelRuntime
+from src.makeModel.modelJaxpr import ModelJaxpr
+from src.makeModel.modelGrads import ModelGrad
 from src.customInterpreter.interpret import safe_interpret
 
 
-modelRuntime = Runtime()
-modelJaxpr = ModelJaxpr()
-modelGrads = ModelGrad()
+modelRuntime = ModelRuntime()
+modelJaxpr = ModelJaxpr(modelRuntime)
+modelGrads = ModelGrad(modelRuntime)
 
 x = modelRuntime.sampleX
 params = modelRuntime.model_params

@@ -3,7 +3,7 @@
 from typing import Union
 from abc import abstractmethod
 from typing_extensions import Protocol, runtime_checkable
-from src.intervalArithmetic.ndarray import NDArray
+from src.customInterpreter.intervalsInterpretation.ndarray import NDArray
 
 """
 Key Features:

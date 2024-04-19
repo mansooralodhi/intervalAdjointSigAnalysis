@@ -1,39 +1,44 @@
 
 
 import jax.numpy as jnp
-from src.customInterpreter.ops_utils import contract_dimensions, broadcast
+from src.customInterpreter.intervalsInterpretation.intervalArithmetic import IntervalArithmetic
+ivalHandler = IntervalArithmetic(jnp)
 
 """
-NB: 
-    jnp.dot -> doesn't work for dot_general due to switching of dimensions.
-    jnp.select -> doesn't work for select_n operation, wrong result. 
+add operation wrt model jaxpr requirements.
 """
 
 
 ############################## Arithmetic Operations ############################
 
 def add(x, y):
-    return jnp.add(x, y)
+    return ivalHandler.add(x, y)
 
 def divide(x, y):
-    return jnp.divide(x, y)
+    return ivalHandler.divide(x, y)
 
 def max(x, y):
-    return jnp.maximum(x, y)
+    return ivalHandler.maximum(x, y)
 
 def gt(x, y):
-    return jnp.greater(x, y)
+    return ivalHandler.greater_than(x, y)
 
 ########################### Reduction/Expansion Operations ####################
 
 def select_n(which, *cases):
-    return jnp.choose(which.astype("int"), cases)
+    return ivalHandler.choose(which, *cases)
 
 def reduce_sum(operand, axes):
-    return jnp.sum(operand, axis=axes)
-
-def broadcast_in_dim(operand, shape, broadcast_dimensions):
-    return broadcast(operand, shape, broadcast_dimensions)
+    return ivalHandler.sum(operand, axis=axes)
 
 def dot_general(lhs, rhs, dimension_numbers, precision = None, preferred_element_type= None):
-    return contract_dimensions(lhs, rhs, dimension_numbers)
+    (axes, (_, _)) = dimension_numbers
+    return ivalHandler.tensordot(lhs, rhs, axes)
+
+def broadcast_in_dim(operand, shape, broadcast_dimensions):
+    in_reshape = jnp.ones(len(shape), dtype=jnp.int32)
+    for i, bd in enumerate(broadcast_dimensions):
+        in_reshape[bd] = operand.shape[i]
+    return jnp.broadcast_to(jnp.reshape(operand, in_reshape), shape)
+
+
