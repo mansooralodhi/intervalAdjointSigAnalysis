@@ -14,7 +14,7 @@ class ModelJaxpr():
         # fixme: if we don't make model_params static then jaxpr need inputs against each nn layer.
         partial_loss_func = partial(self.model_runtime.loss, model_params=self.model_runtime.model_params)
         grad_fn = grad(partial_loss_func)
-        expr = jax.make_jaxpr(grad_fn)(x=x)
+        expr = jax.make_jaxpr(grad_fn)(x)  # not x=x
         return expr
 
     def grad_jaxpr_wrt_params(self, params=None):
@@ -30,7 +30,7 @@ class ModelJaxpr():
             x = self.model_runtime.sampleX
         # fixme: if we don't make model_params static then jaxpr need inputs against each nn layer.
         partial_loss_func = partial(self.model_runtime.loss, model_params=self.model_runtime.model_params)
-        expr = jax.make_jaxpr(partial_loss_func)(x=x)
+        expr = jax.make_jaxpr(partial_loss_func)(x)  # not x=x
         return expr
 
     def forward_jaxpr_wrt_params(self, x=None):
