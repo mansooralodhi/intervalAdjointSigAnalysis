@@ -15,16 +15,19 @@ x = modelRuntime.sampleX
 params = modelRuntime.model_params
 
 featuresInterval = modelRuntime.feature_intervals
-featureIval = (featuresInterval[0], featuresInterval[1])
+featureIval = (featuresInterval[0], featuresInterval[1]) # it's necessary to pass tuple
 
 loss = modelRuntime.loss(x, params)
 expr = modelJaxpr.primal_jaxpr(x, params)
 inp = merge_args(x, params)
 x_est_loss = safe_interpret(expr.jaxpr, expr.literals, inp)[0]
+inp = merge_args(featureIval, params)
+ival_est_loss = safe_interpret(expr.jaxpr, expr.literals, inp)[0]
 
 
-adjoints = modelGrads.grad(x, params, wrt_arg=(0,1))
-expr = modelJaxpr.adjoint_jaxpr(x, params, wrt_arg=(0, 1))
+adjoints = modelGrads.grad(x, params, wrt_arg=0)
+expr = modelJaxpr.adjoint_jaxpr(x, params, wrt_arg=0)
 inp = merge_args(x, params)
-est_adjoint = safe_interpret(expr.jaxpr, expr.literals, inp)
-
+x_est_adjoint = safe_interpret(expr.jaxpr, expr.literals, inp)
+inp = merge_args(featureIval, params)
+ival_est_adjoint = safe_interpret(expr.jaxpr, expr.literals, inp)

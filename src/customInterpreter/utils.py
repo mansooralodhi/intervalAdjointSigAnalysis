@@ -28,5 +28,11 @@ def verify_output(actual_output, estimated_output):
 
 def verify_adjoints(actual_adjoint, estimated_adjiont):
     #todo
+    multiple_active_para =  isinstance(estimated_adjiont, tuple)
+    if not multiple_active_para:
+        pass
+    else:
+        pass
+
     pass
 
