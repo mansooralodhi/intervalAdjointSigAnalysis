@@ -5,7 +5,7 @@ from src.makeModel.modelRuntime import ModelRuntime
 from src.makeModel.modelJaxpr import ModelJaxpr
 from src.makeModel.modelGrads import ModelGrad
 from src.customInterpreter.interpret import safe_interpret
-from src.utils import merge_args
+from src.customInterpreter.utils import merge_args
 
 modelRuntime = ModelRuntime()
 modelJaxpr = ModelJaxpr(modelRuntime)

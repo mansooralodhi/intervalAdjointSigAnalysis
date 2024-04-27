@@ -45,7 +45,7 @@ def safe_interpret(jaxpr: jax.make_jaxpr, consts: list, args: list) -> object:
     consts:
         list of static params/weights
     args:
-        tuple[...]
+        list[...]
         len(args) == len(jaxpr.invars)
     """
     env = {}
