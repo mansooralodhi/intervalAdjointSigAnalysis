@@ -1,47 +1,25 @@
 
 import jax
-from jax import grad
-from functools import partial
+from typing import Union
 from src.makeModel.modelRuntime import ModelRuntime
 
 class ModelJaxpr():
+
     def __init__(self, model_runtime: ModelRuntime):
         self.model_runtime = model_runtime
 
-    def grad_jaxpr_wrt_inputs(self, x = None):
-        if x is None:
-            x = self.model_runtime.sampleX
-        # fixme: if we don't make model_params static then jaxpr need inputs against each nn layer.
-        partial_loss_func = partial(self.model_runtime.loss, model_params=self.model_runtime.model_params)
-        grad_fn = grad(partial_loss_func)
-        expr = jax.make_jaxpr(grad_fn)(x)  # not x=x
-        return expr
+    def primal_jaxpr(self, *args):
+        return jax.make_jaxpr(self.model_runtime.loss)(*args)
 
-    def grad_jaxpr_wrt_params(self, params=None):
-        if params is None:
-            params = self.model_runtime.model_params
-        partial_loss_func = partial(self.model_runtime.loss, x=self.model_runtime.sampleX)
-        grad_fn = grad(partial_loss_func)
-        expr = jax.make_jaxpr(grad_fn)(model_params=params)
-        return expr
-
-    def forward_jaxpr_wrt_inputs(self, x=None):
-        if x is None:
-            x = self.model_runtime.sampleX
-        # fixme: if we don't make model_params static then jaxpr need inputs against each nn layer.
-        partial_loss_func = partial(self.model_runtime.loss, model_params=self.model_runtime.model_params)
-        expr = jax.make_jaxpr(partial_loss_func)(x)  # not x=x
-        return expr
-
-    def forward_jaxpr_wrt_params(self, x=None):
-        if x is None:
-            x = self.model_runtime.sampleX
-        partial_loss_func = partial(self.model_runtime.loss, x=x)
-        expr = jax.make_jaxpr(partial_loss_func)(model_params=self.model_runtime.model_params)
+    def adjoint_jaxpr(self, *args, wrt_arg: Union[int, tuple]):
+        grad_fn = jax.grad(self.model_runtime.loss, argnums=wrt_arg)
+        expr = jax.make_jaxpr(grad_fn)(*args)
         return expr
 
 
 if __name__ == "__main__":
     runtime = ModelRuntime()
-    expr = ModelJaxpr(runtime).forward_jaxpr_wrt_inputs()
+    x = runtime.sampleX
+    params = runtime.model_params
+    expr = ModelJaxpr(runtime).adjoint_jaxpr(x, params, wrt_arg=(0,1))
     print(expr)

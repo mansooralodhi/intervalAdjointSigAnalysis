@@ -9,6 +9,9 @@ add operation wrt model jaxpr requirements.
 """
 
 
+def transpose(x, permutation):
+    return ivalHandler.transpose(x, permutation)
+
 ############################## Arithmetic Operations ############################
 
 def add(x, y):

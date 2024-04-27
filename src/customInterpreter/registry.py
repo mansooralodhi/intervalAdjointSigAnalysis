@@ -27,6 +27,7 @@ def ops_mapping() -> Dict:
     registry[lax.add_p] = add
     registry[lax.div_p] = divide
     registry[lax.select_n_p] = select_n
+    registry[lax.transpose_p] = transpose
     registry[lax.reduce_sum_p] = reduce_sum
     registry[lax.dot_general_p] = dot_general
     registry[lax.broadcast_in_dim_p] = broadcast_in_dim

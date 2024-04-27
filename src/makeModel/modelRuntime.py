@@ -1,8 +1,7 @@
 from flax.training import checkpoints
 import jax
-from jax import grad
-from functools import partial
-
+from typing import List
+from numpy import ndarray
 from src.makeModel.neuralNet import NeuralNet
 
 """
@@ -40,14 +39,14 @@ class ModelRuntime(object):
         self.feature_intervals = None
         self.load_model_params()
 
+    def loss(self, x, model_params):
+        # todo: go back to classification problem and refractor the code accoudingly.
+        scores = self.model(model_params, x)
+        return scores.mean()
+
     def predict(self, x):
         scores = self.model(self.model_params, x)
         return jax.numpy.argmax(scores, -1)
-
-    def loss(self, x=None, model_params=None):
-        # todo: use some better loss function than mean.
-        scores = self.model(model_params, x)
-        return scores.mean()
 
     def define_model(self):
         self.model = NeuralNet()
@@ -61,7 +60,6 @@ class ModelRuntime(object):
         self.sampleY = restored_dict.get("y")
         self.feature_intervals = restored_dict.get("feature_intervals")
         print("Model Loaded.")
-
 
 
 

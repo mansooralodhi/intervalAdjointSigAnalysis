@@ -23,6 +23,11 @@ class IntervalArithmetic():
             return self.as_interval(a)
         return self.np_like.asarray(a)
 
+    def transpose(self, a: Union[NDArrayLike, IntervalLike], permutation=tuple) -> Union[NDArray, Interval]:
+        if isinstance(a, tuple):
+            return self.np_like.transpose(a[0], permutation), self.np_like.transpose(a[1], permutation)
+        return self.np_like.transpose(a, permutation)
+
     ###################################### Attribute Operations ##############################
 
     def shape(self, a: Union[NDArrayLike, IntervalLike]) -> tuple:

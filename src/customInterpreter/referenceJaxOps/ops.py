@@ -10,6 +10,9 @@ NB:
 """
 
 
+def transpose(operand, permutation):
+    return jnp.transpose(operand, permutation)
+
 ############################## Arithmetic Operations ############################
 
 def add(x, y):

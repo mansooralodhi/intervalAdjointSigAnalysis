@@ -121,7 +121,8 @@ class NumpyLike(Protocol):
     @abstractmethod
     def true_divide(self, *args, **kwargs): pass
 
-
+    @abstractmethod
+    def transpose(self, a, permutation): pass
 
 
 if __name__ == '__main__':

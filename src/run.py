@@ -5,7 +5,7 @@ from src.makeModel.modelRuntime import ModelRuntime
 from src.makeModel.modelJaxpr import ModelJaxpr
 from src.makeModel.modelGrads import ModelGrad
 from src.customInterpreter.interpret import safe_interpret
-
+from src.utils import merge_args
 
 modelRuntime = ModelRuntime()
 modelJaxpr = ModelJaxpr(modelRuntime)
@@ -13,56 +13,18 @@ modelGrads = ModelGrad(modelRuntime)
 
 x = modelRuntime.sampleX
 params = modelRuntime.model_params
-featuresInterval = modelRuntime.feature_intervals
-featuresLowerBound = featuresInterval[0]
-featuresUpperBound = featuresInterval[1]
-featureIval = (featuresLowerBound, featuresUpperBound)
 
-###################################### Check forward-pass wrt inputs #####################
+featuresInterval = modelRuntime.feature_intervals
+featureIval = (featuresInterval[0], featuresInterval[1])
 
 loss = modelRuntime.loss(x, params)
-expr = modelJaxpr.forward_jaxpr_wrt_inputs(x)
-x_ival = featureIval
-estimated_loss_x = safe_interpret(expr.jaxpr, expr.literals, x)
-estimated_loss_x_ival = safe_interpret(expr.jaxpr, expr.literals, x_ival)
-print(f"Actual Loss: {loss}\n"
-      f"Interpreted Loss: {estimated_loss_x[0]}\n",
-      f"Interpreted Loss: {estimated_loss_x_ival[0]}\n")
-
-##################################### Check reverse-pass wrt inputs #####################
-
-grad = modelGrads.grad_wrt_inputs()
-expr = modelJaxpr.grad_jaxpr_wrt_inputs(x)
-x_ival = featureIval
-estimated_grad_float = safe_interpret(expr.jaxpr, expr.literals, x)
-estimated_grad_interval = safe_interpret(expr.jaxpr, expr.literals, x_ival)
-print(f"Actual Grad: {grad.shape}\n",
-      f"Interpreted Grad LB: {estimated_grad_float[0].shape}\n"
-      f"Interpreted Grad LB: {estimated_grad_interval[0][0].shape}\n"
-      f"Interpreted Grad UB: {estimated_grad_interval[0][1].shape}\n")
+expr = modelJaxpr.primal_jaxpr(x, params)
+inp = merge_args(x, params)
+x_est_loss = safe_interpret(expr.jaxpr, expr.literals, inp)[0]
 
 
-###################################### Check forward-pass wrt model parameters #########
-# todo:  write function to un-nest the params into a single nested params list.
-#        later try pytrees to convert dictionary of params to list of list.
+adjoints = modelGrads.grad(x, params, wrt_arg=(0,1))
+expr = modelJaxpr.adjoint_jaxpr(x, params, wrt_arg=(0, 1))
+inp = merge_args(x, params)
+est_adjoint = safe_interpret(expr.jaxpr, expr.literals, inp)
 
-# loss = modelRuntime.loss(x, params)
-# expr = modelJaxpr.forward_jaxpr_wrt_params(x)
-# x_ival = featureIval
-# estimated_loss_x = safe_interpret(expr.jaxpr, expr.literals, x)
-# estimated_loss_x_ival = safe_interpret(expr.jaxpr, expr.literals, x_ival)
-# print(f"Actual Loss: {loss}\n"
-#       f"Interpreted Loss: {estimated_loss_x[0]}\n",
-#       f"Interpreted Loss: {estimated_loss_x_ival[0]}\n")
-
-##################################### Check reverse-pass wrt model parameters ###########
-
-# grad = modelGrads.grad_wrt_inputs()
-# expr = modelJaxpr.grad_jaxpr_wrt_inputs(x)
-# x_ival = featureIval
-# estimated_grad_float = safe_interpret(expr.jaxpr, expr.literals, x)
-# estimated_grad_interval = safe_interpret(expr.jaxpr, expr.literals, x_ival)
-# print(f"Actual Grad: {grad.shape}\n",
-#       f"Interpreted Grad LB: {estimated_grad_float[0].shape}\n"
-#       f"Interpreted Grad LB: {estimated_grad_interval[0][0].shape}\n"
-#       f"Interpreted Grad UB: {estimated_grad_interval[0][1].shape}\n")

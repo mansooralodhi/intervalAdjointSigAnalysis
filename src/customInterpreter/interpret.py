@@ -30,6 +30,7 @@ from jax.custom_derivatives import custom_jvp_call_p
 from jax.experimental.pjit import pjit_p
 from jax._src.util import safe_map
 from jax import core
+from jax import lax
 import jax
 
 
@@ -37,7 +38,7 @@ registry = ops_mapping()
 
 ############################### Nested (SafeMap Based) Forward Interpreter ############################
 
-def safe_interpret(jaxpr: jax.make_jaxpr, consts: list, *args: tuple) -> object:
+def safe_interpret(jaxpr: jax.make_jaxpr, consts: list, args: list) -> object:
     """
     jaxpr attributes:
         constvars | invars | eqns (iterated) | outvars (ignored)
@@ -134,6 +135,7 @@ def interpret(jaxpr: jax.make_jaxpr, consts: list, *args: tuple) -> object:
             return outVarValues
 
         elif eqn.primitive in registry:
+
             outVarValues = registry[eqn.primitive](*inVarValues, **eqn.params)
             outVarValues = [outVarValues]
 
