@@ -1,0 +1,107 @@
+
+
+Sources:
+    https://stackoverflow.com/questions/41870228/understanding-tensordot
+    https://stackoverflow.com/questions/26089893/understanding-numpys-einsum
+
+Operations Covered:
+    np.multiply:
+    np.inner:
+    np.outer:
+    np.matmul:
+    np.dot:
+    np.tensordot:
+    np.einsum:
+
+Operations:
+    - Multiply
+            Definition: multiply arguments element-wise
+            Input:- a, b
+            Constraint:- N/A
+            Return:- out
+            Formulation:- N/A
+            Broadcasting: True
+            Usage:-
+                    a*b
+                    np.multiply(a,b)
+
+    - Inner Product
+            Definition: product of two arrays (aka dot product)
+            Input:- a, b
+            Constraint:- a.shape[-1] == b.shape[-1]
+            Return:- out
+                     out.shape = (*a.shape[:-1], *b.shape[:-1])
+            Formulation:- a.b^T
+            Broadcasting: False
+            Usage:-
+                    a*b
+                    np.inner(a,b)
+                    np.tensordot(a,b,axes=(-1,-1))
+
+    - Outer Product
+            Definition: product of two vectors
+            Input:- a, b
+                    a.ravel().shape = (M,)
+                    b.ravel().shape = (N,)
+            Constraint:- N/A
+            Return:- out
+                     out.shape = (M, N)
+                     out[i, j] = a[i] * a[j]
+            Formulation:- N/A
+            Broadcasting: False
+            Usage:-
+                    np.multiply.outer(a.ravel(), b.ravel())
+                    np.tensordot(a.ravel(), b.ravel(), axes=((), ()))
+                    np.einsum('i,j->ij', a.ravel(), b.ravel())
+
+    - Matrix Multiplication
+            Definition: matrix product of two arrays
+            Input:- a, b
+            Constraint:- a.shape[-1] == b.shape[0]
+            Return:- out
+                     out.shape = (*a.shape[:-1], *b.shape[1:])
+            Formulation:- N/A
+            Broadcasting: True
+            Usage:-
+                    a @ b
+                    np.matmul(a,b)
+                    np.dot(a,b)
+
+     - Dot Product
+            Input:- a,b
+                    if a & b are 1-D -> inner product
+                    if a & b are 2-D -> matrix multiplication
+                    if a or b is 0-D -> multiply
+                    if a is N-D & b is 1-D -> sum product
+
+    - tensordot
+            Input:- a,b,axes
+                    if axes == 0: matrix multiplication
+                    if axes == 1: dot product / inner product
+                    else: ... ???
+
+    - einsum
+            Key Differences:
+                    Doesn't allow broadcasting by default.
+                    Rather use ellipses.
+            Implicit-Mode
+                    Single Operand:
+                            np.einsum('i', a) == np.view(a)
+                            np.einsum('ii', a) == np.trace(a)
+                            np.einsum('ji, a') == a.T
+                    Dual Operand:
+                            np.einsum('ii', a, b) == np.inner(a,b)
+                            np.einsum('ij', 'jk', a, b) == np.matmul(a, b)
+                            np.einsum('ij', 'jh', a, b) == np.matmul(a, b).T
+            Explicit-Mode (->)
+                    Single Operand:
+                            np.einsum('i->', a) == np.sum(a, axis=-1)
+                            np.einsum('ii->i', a) == np.diag(a)
+            Ellipsis:
+                    np.einsum('...ii->...i', a)
+                    e.g. trace along the first and last axes:
+                            np.einsum('i...i', a)
+                    e.g. matrix-matrix product with the left-most indices instead of rightmost
+                            np.einsum('ij...,jk...->ik...', a, b)
+                    e.g. np.swapaxes(a, 0, 2)
+                            np.einsum('ijk...->kji...', a)
