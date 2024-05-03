@@ -92,6 +92,7 @@ def safe_interpret(jaxpr: jax.make_jaxpr, consts: list, args: list) -> object:
 ###################################### Plain Forward Interpreter ######################################
 
 def interpret(jaxpr: jax.make_jaxpr, consts: list, *args: tuple) -> object:
+
     """
     jaxpr attributes:
         constvars | invars | eqns (iterated) | outvars (ignored)
@@ -101,6 +102,7 @@ def interpret(jaxpr: jax.make_jaxpr, consts: list, *args: tuple) -> object:
         tuple[...]
         len(args) == len(jaxpr.invars)
     """
+
     env = {}
 
     # write: input variable and their values in env

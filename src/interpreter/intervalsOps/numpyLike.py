@@ -124,6 +124,10 @@ class NumpyLike(Protocol):
     @abstractmethod
     def transpose(self, a, permutation): pass
 
+    @abstractmethod
+    def tanh(self, a):
+        pass
+
 
 if __name__ == '__main__':
     import numpy as np

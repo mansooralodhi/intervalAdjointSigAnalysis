@@ -133,6 +133,11 @@ class IntervalArithmetic():
 
     ##################################### Log/Exp/Power Operations ############################
 
+    def tanh(self, a: Union[NDArrayLike, IntervalLike]) -> Union[NDArray, Interval]:
+        if isinstance(a, tuple):
+            return self.np_like.tanh(a[0]), self.np_like.tanh(a[1])
+        return self.np_like.tanh(a)
+
     def outer_power(self, a: Union[NDArrayLike, IntervalLike], exponent: int, batch_dims: int = 0) -> Union[NDArray, Interval]:
         """Returns a repeated outer product."""
         # todo

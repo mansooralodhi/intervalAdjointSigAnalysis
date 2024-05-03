@@ -12,10 +12,19 @@ add operation wrt model jaxpr requirements.
 def transpose(x, permutation):
     return ivalHandler.transpose(x, permutation)
 
+def tanh(x):
+    return ivalHandler.tanh(x)
+
 ############################## Arithmetic Operations ############################
 
 def add(x, y):
     return ivalHandler.add(x, y)
+
+def sub(x, y):
+    return ivalHandler.subtract(x, y)
+
+def mul(x, y):
+    return ivalHandler.multiply(x, y)
 
 def divide(x, y):
     return ivalHandler.divide(x, y)

@@ -36,7 +36,7 @@ class IntervalOpsValidator(object):
                 else:
                     d1 = flatParams[j].flatten() - ival_adjoints[j][0].flatten()
                     d2 = flatParams[j].flatten() - ival_adjoints[j][1].flatten()
-                    is_bounded = jax.numpy.all(jax.numpy.dot(d1, d2) <= 0)
+                    is_bounded = jax.numpy.all(jax.numpy.dot(d1, d2) < 0)
                 if not is_bounded:
                     raise Exception(f"Sample {i}, layer {j} is out of bound !")
         return True
@@ -55,9 +55,6 @@ class IntervalOpsValidator(object):
         # interpret jax expr with interval input and scalar params
         ival_adjoints = safe_interpret(expr.jaxpr, expr.literals, flatParams)
         return ival_adjoints
-
-
-
 
 
 

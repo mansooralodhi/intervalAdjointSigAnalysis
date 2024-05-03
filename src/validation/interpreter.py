@@ -11,11 +11,9 @@ Compute primals and adjoints with scalar inputs and compare the results with jax
 class InterValidator(object):
     def __init__(self, model_file: str = ''):
 
-        modelLoader = ModelLoader(model_file)
-
-        self.x = modelLoader.sampleX
-        self.params = modelLoader.model_params
-        self.modelRuntime = ModelRuntime(modelLoader.model)
+        self.modelRuntime = ModelRuntime(model_file)
+        self.params = self.modelRuntime.model_params
+        self.x = self.modelRuntime.sampleX
 
     def verify_primals(self):
         loss = self.modelRuntime.loss(self.x, self.params)
