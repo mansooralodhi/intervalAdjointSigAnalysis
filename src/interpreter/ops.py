@@ -1,5 +1,5 @@
 
-
+from jax import lax
 import jax.numpy as jnp
 from src.interpreter.intervalsOps.intervalArithmetic import IntervalArithmetic
 ivalHandler = IntervalArithmetic(jnp)
@@ -53,4 +53,23 @@ def broadcast_in_dim(operand, shape, broadcast_dimensions):
         in_reshape[bd] = operand.shape[i]
     return jnp.broadcast_to(jnp.reshape(operand, in_reshape), shape)
 
+def slice(operand, start_indices, limit_indices, strides=None):
+    # todo: verify
+    return
+    if isinstance(operand, tuple):
+        return lax.slice(operand[0], start_indices, limit_indices, strides), lax.slice(operand[1], start_indices, limit_indices, strides)
+    return lax.slice(operand, start_indices, limit_indices, strides)
 
+def sqeeze(array, dimensions):
+    # todo: verify
+    return
+    if isinstance(array, tuple):
+        return lax.squeeze(array[0], dimensions), lax.squeeze(array[1], dimensions)
+    return lax.squeeze(array, dimensions)
+
+def pad(operand, padding_value, padding_config):
+    # todo: verify
+    return
+    if isinstance(operand, tuple):
+        return lax.pad(operand[0], padding_value, padding_config), lax.pad(operand[1], padding_value, padding_config)
+    return lax.pad(operand, padding_value, padding_config)

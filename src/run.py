@@ -15,6 +15,8 @@ featureIval = (featuresInterval[0], featuresInterval[1]) # it's necessary to pas
 
 loss = modelRuntime.loss(x, params)
 expr = modelRuntime.primal_jaxpr(x, params)
+# print(expr)
+# print("-"*50)
 flatParams, _ = jax.tree_flatten(params)
 flatParams.insert(0, x)
 x_est_loss = safe_interpret(expr.jaxpr, expr.literals, flatParams)[0]
@@ -29,13 +31,16 @@ print(f"Actual Loss: {loss}\n"
 
 adjoints = modelRuntime.grad(x, params, wrt_arg=(0))
 expr = modelRuntime.adjoint_jaxpr(x, params, wrt_arg=(0))
+# print(expr)
 flatParams, _ = jax.tree_flatten(params)
 flatParams.insert(0, x)
 x_est_adjoint = safe_interpret(expr.jaxpr, expr.literals, flatParams)[0]
+#
 flatParams, _ = jax.tree_flatten(params)
 flatParams.insert(0, featureIval)
 ival_est_adjoint = safe_interpret(expr.jaxpr, expr.literals, flatParams)[0]
 
+# print()
 print(f"Adjoints == Interpreted Adjoints:  {all(adjoints == x_est_adjoint)}\n"
       f"Len of Interpreted Adjoints: {len(ival_est_adjoint)}\n"
       f"Interpreted Adjoint Lb < UB: {all(ival_est_adjoint[0]<ival_est_adjoint[1])}")

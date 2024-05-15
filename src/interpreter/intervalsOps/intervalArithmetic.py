@@ -7,6 +7,7 @@ from src.interpreter.intervalsOps.numpyLike import (NDArray, NDArrayLike, Interv
 Source: https://github.com/google/autobound/blob/3013a1030834b686f1bbb97ac9c2d825e51b0b7d/autobound/interval_arithmetic.py#L285
 """
 
+import jax.numpy as jnp
 
 class IntervalArithmetic():
 
@@ -60,7 +61,13 @@ class IntervalArithmetic():
 
     def choose(self, which: Union[NDArrayLike, IntervalLike], *cases) ->  Union[NDArrayLike, IntervalLike]:
         if isinstance(which, tuple):
-            return self.np_like.choose(which[0].astype('int'), cases), self.np_like.choose(which[1].astype('int'), cases)
+            # fixme (fixed): this is to handle the special case of Relu activation function.
+            #  Otherwise an improper interval is returned which don't follow the lb<up criteria.
+            lb, ub = (self.np_like.choose(which[0].astype('int'), cases), self.np_like.choose(which[1].astype('int'), cases))
+            diff = ub - lb
+            mask = diff < 0
+            ub = jnp.where(mask, ub - diff, ub)
+            return lb, ub
         return self.np_like.choose(which.astype('int'), cases)
 
     ####################################### Arithmetic Operations ############################

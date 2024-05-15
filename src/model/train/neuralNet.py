@@ -25,7 +25,8 @@ class NeuralNet(linen.Module):
     @linen.compact
     def __call__(self, x):
         x = linen.Dense(128)(x)
-        x = linen.tanh(x)
+        # x = linen.tanh(x)
+        x = linen.relu(x)
         x = linen.Dense(self.n_targets)(x)
         return x
 

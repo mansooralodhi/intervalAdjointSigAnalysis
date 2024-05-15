@@ -1,0 +1,11 @@
+{ lambda ; a:f32[784] b:f32[128] c:f32[784,128] d:f32[10] e:f32[128,10]. let
+    f:f32[128] = dot_general[dimension_numbers=(([0], [0]), ([], []))] a c
+    g:f32[128] = add f b
+    m:bool[128] = gt g 0.0
+    q:f32[] = div 1.0 10.0
+    r:f32[10] = broadcast_in_dim[broadcast_dimensions=() shape=(10,)] q
+    s:f32[128] = dot_general[dimension_numbers=(([0], [1]), ([], []))] r e
+    t:f32[128] = broadcast_in_dim[broadcast_dimensions=() shape=(128,)] 0.0
+    u:f32[128] = select_n m t s
+    v:f32[784] = dot_general[dimension_numbers=(([0], [1]), ([], []))] u c
+  in (v,) }

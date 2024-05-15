@@ -30,7 +30,6 @@ from jax.custom_derivatives import custom_jvp_call_p
 from jax.experimental.pjit import pjit_p
 from jax._src.util import safe_map
 from jax import core
-from jax import lax
 import jax
 
 
@@ -67,13 +66,15 @@ def safe_interpret(jaxpr: jax.make_jaxpr, consts: list, args: list) -> object:
 
         if eqn.primitive == custom_jvp_call_p:
             sub_closedJaxpr = eqn.params['call_jaxpr']
-            outVarValues = interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
+            # todo: you might need to use interpret due to difference in argument type
+            outVarValues = safe_interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, inVarValues)
             outVarValues = outVarValues if isinstance(outVarValues, list|tuple) else [outVarValues]
             safe_map(write, eqn.outvars, outVarValues)
 
         elif eqn.primitive == pjit_p:
             sub_closedJaxpr = eqn.params['jaxpr']
-            outVarValues = interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
+            # todo: you might need to use interpret due to difference in argument type
+            outVarValues = safe_interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, inVarValues)
             return outVarValues
 
         elif eqn.primitive in registry:

@@ -20,6 +20,10 @@ def ops_mapping() -> Dict:
     ################################### Static Operations ###############################
     registry[lax.device_put_p] = jax.device_put
     registry[add_jaxvals_p] =  add # problem with: add_jaxvals_p.impl
+    registry[lax.slice_p] = slice
+    registry[lax.squeeze_p] = sqeeze
+    registry[lax.pad_p] = pad
+
     # registry[lax.ceil_p] = lax.ceil
 
 
