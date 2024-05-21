@@ -1,3 +1,10 @@
+
+
+
+
+
+
+
 { lambda ; a:f32[784] b:f32[128] c:f32[784,128] d:f32[10] e:f32[128,10]. let
     f:f32[128] = dot_general[dimension_numbers=(([0], [0]), ([], []))] a c
     g:f32[128] = add f b

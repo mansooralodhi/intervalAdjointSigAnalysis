@@ -66,16 +66,15 @@ def safe_interpret(jaxpr: jax.make_jaxpr, consts: list, args: list) -> object:
 
         if eqn.primitive == custom_jvp_call_p:
             sub_closedJaxpr = eqn.params['call_jaxpr']
-            # todo: you might need to use interpret due to difference in argument type
-            outVarValues = safe_interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, inVarValues)
+            outVarValues = interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
             outVarValues = outVarValues if isinstance(outVarValues, list|tuple) else [outVarValues]
             safe_map(write, eqn.outvars, outVarValues)
 
         elif eqn.primitive == pjit_p:
             sub_closedJaxpr = eqn.params['jaxpr']
-            # todo: you might need to use interpret due to difference in argument type
-            outVarValues = safe_interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, inVarValues)
-            return outVarValues
+            outVarValues = interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
+            outVarValues = outVarValues if isinstance(outVarValues, list|tuple) else [outVarValues]
+            safe_map(write, eqn.outvars, outVarValues)
 
         elif eqn.primitive in registry:
             outVarValues = registry[eqn.primitive](*inVarValues, **eqn.params)
@@ -135,19 +134,26 @@ def interpret(jaxpr: jax.make_jaxpr, consts: list, *args: tuple) -> object:
         elif eqn.primitive == pjit_p:
             sub_closedJaxpr = eqn.params['jaxpr']
             outVarValues = interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
-            return outVarValues
+            outVarValues = outVarValues if isinstance(outVarValues, list | tuple) else [outVarValues]
+            for var, val in zip(eqn.outvars, outVarValues):
+                env[var] = val
+            continue
 
         elif eqn.primitive in registry:
-
-            outVarValues = registry[eqn.primitive](*inVarValues, **eqn.params)
-            outVarValues = [outVarValues]
-
+            try:
+                outVarValues = registry[eqn.primitive](*inVarValues, **eqn.params)
+                outVarValues = [outVarValues]
+            except:
+                print(eqn.params)
             # write output variable values in env
             for var, val in zip(eqn.outvars, outVarValues):
                 env[var] = val
 
         else:
-            raise NotImplementedError(f"{eqn.primitive} does not have registered interval equivalent.")
+            try:
+                print(eqn)
+            except:
+                raise NotImplementedError(f"{eqn.primitive} does not have registered interval equivalent.")
 
     # read: output variable values from env.
     output = list()

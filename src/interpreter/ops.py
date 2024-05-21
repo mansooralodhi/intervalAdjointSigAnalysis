@@ -15,6 +15,9 @@ def transpose(x, permutation):
 def tanh(x):
     return ivalHandler.tanh(x)
 
+def logistic(x):
+    return ivalHandler.logistic(x)
+
 ############################## Arithmetic Operations ############################
 
 def add(x, y):
@@ -34,6 +37,12 @@ def max(x, y):
 
 def gt(x, y):
     return ivalHandler.greater_than(x, y)
+
+def convert_element_type(x, new_dtype, weak_type):
+    return ivalHandler.convert_element_type(x, new_dtype, weak_type)
+
+def expm1(x, ):
+    return ivalHandler.expm1(x, )
 
 ########################### Reduction/Expansion Operations ####################
 

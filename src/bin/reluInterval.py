@@ -1,7 +1,7 @@
 
 import jax
 from flax import linen
-from src.interpreter.interpret import safe_interpret
+from src.interpreter.interpret_v0 import safe_interpret
 
 
 def model(x, W, b):

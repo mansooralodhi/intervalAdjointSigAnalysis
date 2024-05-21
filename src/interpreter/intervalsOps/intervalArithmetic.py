@@ -1,5 +1,8 @@
 from functools import partial
 from typing import Union, Callable
+
+import jax.lax
+
 from src.interpreter.intervalsOps.bilinearfn import custom_bilinear
 from src.interpreter.intervalsOps.numpyLike import (NDArray, NDArrayLike, Interval, IntervalLike, NumpyLike)
 
@@ -7,7 +10,7 @@ from src.interpreter.intervalsOps.numpyLike import (NDArray, NDArrayLike, Interv
 Source: https://github.com/google/autobound/blob/3013a1030834b686f1bbb97ac9c2d825e51b0b7d/autobound/interval_arithmetic.py#L285
 """
 
-import jax.numpy as jnp
+import jax
 
 class IntervalArithmetic():
 
@@ -41,6 +44,16 @@ class IntervalArithmetic():
             return self.np_like.ndim(a[0])
         return self.np_like.ndim(a)
 
+    def convert_element_type(self, a: Union[NDArrayLike, IntervalLike], new_dtype, weak_type) -> int:
+        if isinstance(a, tuple):
+            return jax.lax.convert_element_type(a[0], new_dtype, weak_type), jax.lax.convert_element_type(a[1], new_dtype, weak_type)
+        return jax.lax.convert_element_type(a, new_dtype)
+
+
+    def expm1(self, a: Union[NDArrayLike, IntervalLike],) -> int:
+        if isinstance(a, tuple):
+            return self.np_like.expm1(a[0],), self.np_like.expm1(a[1], )
+        return self.np_like.expm1(a,)
     ###################################### Condition Operations ##############################
 
     def maximum(self, a: Union[NDArrayLike, IntervalLike], b: NDArray) -> Union[NDArray, Interval]:
@@ -63,11 +76,15 @@ class IntervalArithmetic():
         if isinstance(which, tuple):
             # fixme (fixed): this is to handle the special case of Relu activation function.
             #  Otherwise an improper interval is returned which don't follow the lb<up criteria.
-            lb, ub = (self.np_like.choose(which[0].astype('int'), cases), self.np_like.choose(which[1].astype('int'), cases))
-            diff = ub - lb
-            mask = diff < 0
-            ub = jnp.where(mask, ub - diff, ub)
-            return lb, ub
+            try:
+                lb, ub = (self.np_like.choose(which[0].astype('int'), cases), self.np_like.choose(which[1].astype('int'), cases))
+            except:
+                print()
+            # if all(lb <= ub):
+            #     return lb, ub
+            # if all(lb > ub):
+            return ub, lb
+            # raise Exception("Error: all lower bounds are not less than equal to upper bounds !!!!")
         return self.np_like.choose(which.astype('int'), cases)
 
     ####################################### Arithmetic Operations ############################
@@ -144,6 +161,11 @@ class IntervalArithmetic():
         if isinstance(a, tuple):
             return self.np_like.tanh(a[0]), self.np_like.tanh(a[1])
         return self.np_like.tanh(a)
+
+    def logistic(self, a: Union[NDArrayLike, IntervalLike]) -> Union[NDArray, Interval]:
+        if isinstance(a, tuple):
+            return jax.lax.logistic(a[0]), jax.lax.logistic(a[1])
+        return jax.lax.logistic(a)
 
     def outer_power(self, a: Union[NDArrayLike, IntervalLike], exponent: int, batch_dims: int = 0) -> Union[NDArray, Interval]:
         """Returns a repeated outer product."""

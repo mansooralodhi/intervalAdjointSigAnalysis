@@ -3,7 +3,7 @@
 import jax
 from src.model.loader import ModelLoader
 from src.model.runtime import ModelRuntime
-from src.interpreter.interpret import safe_interpret
+from src.interpreter.interpret_v0 import safe_interpret
 
 modelLoader = ModelLoader()
 modelRuntime = ModelRuntime(modelLoader.model)
