@@ -1,6 +1,7 @@
 
 from jax import lax
 import jax.numpy as jnp
+import numpy as np
 from src.interpreter.intervalsOps.intervalArithmetic import IntervalArithmetic
 ivalHandler = IntervalArithmetic(jnp)
 
@@ -35,11 +36,14 @@ def divide(x, y):
 def max(x, y):
     return ivalHandler.maximum(x, y)
 
+def min(x, y):
+    return ivalHandler.minimum(x, y)
+
 def gt(x, y):
     return ivalHandler.greater_than(x, y)
 
-def convert_element_type(x, new_dtype, weak_type):
-    return ivalHandler.convert_element_type(x, new_dtype, weak_type)
+# def convert_element_type(x, new_dtype, weak_type):
+#     return ivalHandler.convert_element_type(x, new_dtype, weak_type)
 
 def expm1(x, ):
     return ivalHandler.expm1(x, )
@@ -52,12 +56,13 @@ def select_n(which, *cases):
 def reduce_sum(operand, axes):
     return ivalHandler.sum(operand, axis=axes)
 
+
 def dot_general(lhs, rhs, dimension_numbers, precision = None, preferred_element_type= None):
     (axes, (_, _)) = dimension_numbers
     return ivalHandler.tensordot(lhs, rhs, axes)
 
 def broadcast_in_dim(operand, shape, broadcast_dimensions):
-    in_reshape = jnp.ones(len(shape), dtype=jnp.int32)
+    in_reshape = np.ones(len(shape), dtype=jnp.int32) # NB: if this is changed to jnp then we get trace error __index__
     for i, bd in enumerate(broadcast_dimensions):
         in_reshape[bd] = operand.shape[i]
     return jnp.broadcast_to(jnp.reshape(operand, in_reshape), shape)

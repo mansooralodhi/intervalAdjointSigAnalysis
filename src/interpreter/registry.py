@@ -31,13 +31,14 @@ def ops_mapping() -> Dict:
     ################################### Custom Operations ###############################
     registry[lax.gt_p] = gt
     registry[lax.max_p] = max
+    registry[lax.min_p] = min
     registry[lax.add_p] = add
     registry[lax.sub_p] = sub
     registry[lax.mul_p] = mul
     registry[lax.div_p] = divide
     registry[lax.tanh_p] = tanh
     registry[lax.logistic_p] = logistic
-    registry[lax.convert_element_type_p] = convert_element_type
+    # registry[lax.convert_element_type_p] = convert_element_type
     registry[lax.select_n_p] = select_n
     registry[lax.transpose_p] = transpose
     registry[lax.reduce_sum_p] = reduce_sum

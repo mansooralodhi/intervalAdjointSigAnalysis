@@ -36,6 +36,12 @@ import jax
 registry = ops_mapping()
 
 ############################### Nested (SafeMap Based) Forward Interpreter ############################
+def inputs_are_none(inputs):
+    if isinstance(inputs, list):
+        for i in inputs:
+            if i is None:
+                return False
+    return True
 
 def safe_interpret(jaxpr: jax.make_jaxpr, consts: list, args: list) -> object:
     """
@@ -82,10 +88,11 @@ def safe_interpret(jaxpr: jax.make_jaxpr, consts: list, args: list) -> object:
             # outVarValues = outVarValues if isinstance(outVarValues, list|tuple) else [outVarValues]
             outVarValues = [outVarValues]
             safe_map(write, eqn.outvars, outVarValues)
-
         else:
-            raise NotImplementedError(f"{eqn.primitive} does not have registered interval equivalent.")
-
+            try:
+                raise NotImplementedError(f"{eqn.primitive} does not have registered interval equivalent.")
+            except Exception as e:
+                print(e)
     output = safe_map(read, jaxpr.outvars)
     return output
 

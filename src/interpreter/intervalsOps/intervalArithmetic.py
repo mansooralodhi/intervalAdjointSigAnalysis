@@ -64,6 +64,14 @@ class IntervalArithmetic():
                 raise NotImplementedError(b)
         return self.np_like.maximum(a, b)
 
+    def minimum(self, a: Union[NDArrayLike, IntervalLike], b: NDArray) -> Union[NDArray, Interval]:
+        if isinstance(a, tuple):
+            if isinstance(b, NDArray) and b.shape == ():
+                return self.np_like.minimum(a[0], b), self.np_like.minimum(a[1], b)
+            else:
+                raise NotImplementedError(b)
+        return self.np_like.minimum(a, b)
+
     def greater_than(self, a: Union[NDArrayLike, IntervalLike], b: NDArray) -> Union[NDArray, Interval]:
         if isinstance(a, tuple):
             if isinstance(b, NDArray) and b.shape == ():
@@ -76,16 +84,13 @@ class IntervalArithmetic():
         if isinstance(which, tuple):
             # fixme (fixed): this is to handle the special case of Relu activation function.
             #  Otherwise an improper interval is returned which don't follow the lb<up criteria.
-            try:
-                lb, ub = (self.np_like.choose(which[0].astype('int'), cases), self.np_like.choose(which[1].astype('int'), cases))
-            except:
-                print()
+            lb, ub = (self.np_like.choose(which[0].astype('int'), cases, mode='clip'), self.np_like.choose(which[1].astype('int'), cases, mode='clip'))
             # if all(lb <= ub):
             #     return lb, ub
             # if all(lb > ub):
-            return ub, lb
+            return lb, ub
             # raise Exception("Error: all lower bounds are not less than equal to upper bounds !!!!")
-        return self.np_like.choose(which.astype('int'), cases)
+        return self.np_like.choose(which.astype('int'), cases, mode='wrap')
 
     ####################################### Arithmetic Operations ############################
 
