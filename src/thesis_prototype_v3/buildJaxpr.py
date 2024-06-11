@@ -12,7 +12,7 @@ from jax.interpreters import partial_eval as pe
 class BuildJaxpr:
 
     customDtype = []
-    is_leaf = lambda x: type(x) in BuildJaxpr.customDtype
+    is_leaf = lambda x: isinstance(x, np.ndarray) or type(x) in BuildJaxpr.customDtype
 
     @classmethod
     def to_avals(cls, args: Union[Tuple, List]) -> any:
@@ -36,7 +36,6 @@ class BuildJaxpr:
         args_flat, in_tree = tree_flatten(args, is_leaf=cls.is_leaf)
         in_avals_flat = cls.to_avals(args_flat)
         wrapped_fun, out_tree = flatten_fun_nokwargs(lu.wrap_init(f, {}), in_tree)
-        # note: abstract values are used to trace the and the computational graph leading to jaxpr.
         jaxpr, out_avals_flat, consts = pe.trace_to_jaxpr_dynamic(wrapped_fun, in_avals_flat)
         return jaxpr, consts
 
