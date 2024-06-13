@@ -2,7 +2,7 @@
 import jax
 import jax.numpy as jnp
 import numpy as np
-from src.thesis_prototype_v5.interpreter.ivalOps.intervalArithmetic import IntervalArithmetic
+from src.thesis_prototype_v5.custom_interpreter.ivalOps.intervalArithmetic import IntervalArithmetic
 ivalHandler = IntervalArithmetic(jnp)
 
 """

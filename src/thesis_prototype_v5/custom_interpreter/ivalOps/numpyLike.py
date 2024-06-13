@@ -3,7 +3,7 @@
 from typing import Union
 from abc import abstractmethod
 from typing_extensions import Protocol, runtime_checkable
-from src.thesis_prototype_v5.interpreter.ivalOps.ndarray import NDArray
+from src.thesis_prototype_v5.custom_interpreter.ivalOps.ndarray import NDArray
 
 """
 Key Features:

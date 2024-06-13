@@ -29,12 +29,12 @@ import jax
 from jax import core
 from jax._src.util import safe_map
 from jax.experimental.pjit import pjit_p
-from src.thesis_prototype_v5.interpreter.registry import ops_mapping
+from src.thesis_prototype_v5.custom_interpreter.registry import ops_mapping
 from jax.custom_derivatives import custom_jvp_call_p
 
 
 
-class CustomInterpreter(object):
+class Interpreter(object):
 
     def __init__(self):
         self.registry = ops_mapping()

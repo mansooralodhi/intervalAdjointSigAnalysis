@@ -3,8 +3,8 @@ from typing import Union, Callable
 
 import jax.lax
 
-from src.thesis_prototype_v5.interpreter.ivalOps.bilinearfn import custom_bilinear
-from src.thesis_prototype_v5.interpreter.ivalOps.numpyLike import (NDArray, NDArrayLike, Interval, IntervalLike, NumpyLike)
+from src.thesis_prototype_v5.custom_interpreter.ivalOps.bilinearfn import custom_bilinear
+from src.thesis_prototype_v5.custom_interpreter.ivalOps.numpyLike import (NDArray, NDArrayLike, Interval, IntervalLike, NumpyLike)
 
 """
 Source: https://github.com/google/autobound/blob/3013a1030834b686f1bbb97ac9c2d825e51b0b7d/autobound/interval_arithmetic.py#L285

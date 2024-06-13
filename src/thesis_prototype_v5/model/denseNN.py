@@ -32,7 +32,7 @@ class DenseNN(object):
     def calculate_y(self, x):
         y = jax.numpy.dot(x, self.weights[0][0].T) + self.weights[0][1]
         for i in range(1, len(self.weights)):
-            y = self.relu(y)
+            y = self.sigmoid(y)
             y = jax.numpy.dot(y, self.weights[i][0].T) + self.weights[i][1]
         return y[0]
 

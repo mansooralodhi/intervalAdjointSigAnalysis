@@ -1,7 +1,7 @@
 
 
 import jax.numpy as jnp
-from src.thesis_prototype_v5.interpreter.referJaxOps.ops_utils import contract_dimensions, broadcast
+from src.thesis_prototype_v5.custom_interpreter.referJaxOps.ops_utils import contract_dimensions, broadcast
 
 """
 NB: 

@@ -3,7 +3,7 @@
 2. Define interval range using jnp
 3. Get jaxpr from make_jaxpr
 4. Write interval jax registry
-5. Use custom jaxpr interpreter
+5. Use custom jaxpr custom_interpreter
 6. Find function output
 7. Find derivative jax.grad, jax.jacfwd
 

@@ -1,7 +1,7 @@
 from jax import lax
 from typing import Dict
 
-from src.thesis_prototype_v5.interpreter.opsInterface import *
+from src.thesis_prototype_v5.custom_interpreter.opsInterface import *
 
 def ops_mapping() -> Dict:
 
@@ -33,9 +33,9 @@ def ops_mapping() -> Dict:
     registry[lax.dot_general_p] = dot_general
     registry[lax.integer_pow_p] = integer_pow
 
+    registry[lax.exp_p] = exp
     registry[lax.tanh_p] = tanh
     registry[lax.logistic_p] = logistic
-    registry[lax.exp_p] = exp
 
     registry[lax.transpose_p] = transpose
     registry[lax.broadcast_in_dim_p] = broadcast_in_dim
