@@ -1,7 +1,5 @@
-to be continued ...
+<details><summary>Code Structure</summary>
 
-Code Structure:
-==============
 -  Custom Derivative Rules (Module)
    -  relu.py
    -  sigmoid.
@@ -22,3 +20,4 @@ Code Structure:
    -  dataloader.py
    -  checkpoints
 -  main.py
+</details>
