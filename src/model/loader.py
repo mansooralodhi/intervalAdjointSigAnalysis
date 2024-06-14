@@ -2,7 +2,7 @@
 
 import os
 from flax.training import checkpoints
-from src.model.train.neuralNet import NeuralNet
+from src.model.neuralNet import NeuralNet
 
 
 class ModelLoader(object):

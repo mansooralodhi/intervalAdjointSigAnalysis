@@ -1,9 +1,9 @@
 
 
-from src.model.train.dataset import Dataset
-from src.model.train.dataloader import Dataloader
-from src.model.train.neuralNet import NeuralNet
-from src.model.train.trainer import train_model
+from src.model.dataset import Dataset
+from src.model.dataloader import Dataloader
+from src.model.neuralNet import NeuralNet
+from src.model.trainer import train_model
 
 import jax
 import optax

@@ -3,7 +3,7 @@
 from typing import Union
 from abc import abstractmethod
 from typing_extensions import Protocol, runtime_checkable
-from src.interpreter.intervalsOps.ndarray import NDArray
+from src.custom_interpreter.ivalOps.ndarray import NDArray
 
 """
 Key Features:
@@ -22,6 +22,10 @@ class NumpyLike(Protocol):
     """
     Could be numpy or jax.numpy !
     """
+
+    def __init__(self):
+        pass
+
     @abstractmethod
     def add(self, a: NDArrayLike, b: NDArrayLike) -> NDArrayLike: pass
 
@@ -125,8 +129,22 @@ class NumpyLike(Protocol):
     def transpose(self, a, permutation): pass
 
     @abstractmethod
-    def tanh(self, a):
-        pass
+    def tanh(self, a): pass
+
+    @abstractmethod
+    def negative(self, param): pass
+
+    @abstractmethod
+    def choose(self, param, cases, mode): pass
+
+    @abstractmethod
+    def asarray(self, param): pass
+
+    @abstractmethod
+    def tensordot(self, *args, **kwargs): pass
+
+    @abstractmethod
+    def greater(self, a, b): pass
 
 
 if __name__ == '__main__':

@@ -68,7 +68,10 @@ class NDArray(Protocol):
     def reshape(self, *args, **kwargs) -> 'NDArray': pass
 
     @abstractmethod
-    def transpose(self,*axes) -> 'NDArray': pass
+    def transpose(self, *axes) -> 'NDArray': pass
+
+    @abstractmethod
+    def astype(self, param): pass
 
 
 if __name__ == "__main__":

@@ -2,12 +2,9 @@
 from jax import lax
 import jax.numpy as jnp
 import numpy as np
-from src.interpreter.intervalsOps.intervalArithmetic import IntervalArithmetic
-ivalHandler = IntervalArithmetic(jnp)
+from src.custom_interpreter.ivalOps.ivalArithmetic import IntervalArithmetic
 
-"""
-add operation wrt model jaxpr requirements.
-"""
+ivalHandler = IntervalArithmetic(jnp)
 
 
 def transpose(x, permutation):
@@ -42,8 +39,6 @@ def min(x, y):
 def gt(x, y):
     return ivalHandler.greater_than(x, y)
 
-# def convert_element_type(x, new_dtype, weak_type):
-#     return ivalHandler.convert_element_type(x, new_dtype, weak_type)
 
 def expm1(x, ):
     return ivalHandler.expm1(x, )
@@ -55,7 +50,6 @@ def select_n(which, *cases):
 
 def reduce_sum(operand, axes):
     return ivalHandler.sum(operand, axis=axes)
-
 
 def dot_general(lhs, rhs, dimension_numbers, precision = None, preferred_element_type= None):
     (axes, (_, _)) = dimension_numbers
