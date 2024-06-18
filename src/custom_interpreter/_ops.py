@@ -51,16 +51,6 @@ def select_n(which, *cases):
 def reduce_sum(operand, axes):
     return ivalHandler.sum(operand, axis=axes)
 
-def dot_general(lhs, rhs, dimension_numbers, precision = None, preferred_element_type= None):
-    (axes, (_, _)) = dimension_numbers
-    return ivalHandler.tensordot(lhs, rhs, axes)
-
-def broadcast_in_dim(operand, shape, broadcast_dimensions):
-    in_reshape = np.ones(len(shape), dtype=jnp.int32) # NB: if this is changed to jnp then we get trace error __index__
-    for i, bd in enumerate(broadcast_dimensions):
-        in_reshape[bd] = operand.shape[i]
-    return jnp.broadcast_to(jnp.reshape(operand, in_reshape), shape)
-
 def slice(operand, start_indices, limit_indices, strides=None):
     # todo: verify
     return
@@ -81,3 +71,4 @@ def pad(operand, padding_value, padding_config):
     if isinstance(operand, tuple):
         return lax.pad(operand[0], padding_value, padding_config), lax.pad(operand[1], padding_value, padding_config)
     return lax.pad(operand, padding_value, padding_config)
+

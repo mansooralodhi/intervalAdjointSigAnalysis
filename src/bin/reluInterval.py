@@ -1,7 +1,9 @@
 
 import jax
 from flax import linen
-from src.custom_interpreter.interpret_v0 import safe_interpret
+from src.custom_interpreter.interpreter import Interpreter
+
+interpreter = Interpreter()
 
 
 def model(x, W, b):
@@ -26,7 +28,7 @@ def intervalX(x):
 def get_primal(x, ivalX):
     weights = initialize_wrights()
     expr = jax.make_jaxpr(model)(x, weights['W'], weights['b'])
-    y = safe_interpret(expr.jaxpr, expr.literals, [ivalX, weights['W'], weights['b']])[0]
+    y = interpreter.safe_interpret(expr.jaxpr, expr.literals, [ivalX, weights['W'], weights['b']])[0]
     t = model(x, weights['W'], weights['b'])
     return y, t
 
@@ -35,7 +37,7 @@ def get_adjoint(x, ivalX):
     weights = initialize_wrights()
     wrapper = jax.grad(model, argnums=0)
     expr = jax.make_jaxpr(wrapper)(x, weights['W'], weights['b'])
-    y = safe_interpret(expr.jaxpr, expr.literals, [ivalX, weights['W'], weights['b']])[0]
+    y = interpreter.safe_interpret(expr.jaxpr, expr.literals, [ivalX, weights['W'], weights['b']])[0]
     t = jax.grad(model, argnums=0)(x, weights['W'], weights['b'])
     return y, t
 

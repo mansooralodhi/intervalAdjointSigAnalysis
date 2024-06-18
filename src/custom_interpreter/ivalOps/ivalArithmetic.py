@@ -1,6 +1,7 @@
 from functools import partial
 from typing import Union, Callable
 
+from src.custom_interpreter.ivalOps import utils
 from src.custom_interpreter.ivalOps.bilinearfn import custom_bilinear
 from src.custom_interpreter.ivalOps.numpyLike import (NDArray, NDArrayLike, Interval, IntervalLike, NumpyLike)
 
@@ -88,7 +89,8 @@ class IntervalArithmetic():
         else:
             return self.np_like.add(a, b)
 
-    def subtract(self, a: Union[NDArrayLike, IntervalLike], b: Union[NDArrayLike, IntervalLike]) -> Union[NDArray, Interval]:
+    def subtract(self, a: Union[NDArrayLike, IntervalLike], b: Union[NDArrayLike, IntervalLike]) -> Union[
+        NDArray, Interval]:
 
         a_is_interval = isinstance(a, tuple)
         b_is_interval = isinstance(b, tuple)
@@ -105,16 +107,22 @@ class IntervalArithmetic():
         else:
             return self.np_like.subtract(a, b)
 
-    def multiply(self, a: Union[NDArrayLike, IntervalLike], b: Union[NDArrayLike, IntervalLike]) -> Union[NDArray, Interval]:
+    def multiply(self, a: Union[NDArrayLike, IntervalLike], b: Union[NDArrayLike, IntervalLike]) -> Union[
+        NDArray, Interval]:
         return self._arbitrary_bilinear(a, b, self.np_like.multiply, assume_product=True)
 
     def divide(self, a: Union[NDArrayLike, IntervalLike], b: NDArray) -> Union[NDArray, Interval]:
         b = self.np_like.divide(1, b)
         return self.multiply(a, b)
 
-    def tensordot(self, a: Union[NDArrayLike, IntervalLike], b: Union[NDArrayLike, IntervalLike], axes) -> Union[NDArray, Interval]:
+    def tensordot(self, a: Union[NDArrayLike, IntervalLike], b: Union[NDArrayLike, IntervalLike], axes) -> Union[
+        NDArray, Interval]:
         bilinear = partial(self.np_like.tensordot, axes=axes)
         return self._arbitrary_bilinear(a, b, bilinear, assume_product=axes == 0)
+
+    def dot_general(self, lhs, rhs, dimension_numbers, precision=None, preferred_element_type=None):
+        (axes, (_, _)) = dimension_numbers
+        return self.tensordot(lhs, rhs, axes)
 
     def _arbitrary_bilinear(self, a: Union[NDArrayLike, IntervalLike], b: Union[NDArrayLike, IntervalLike],
                             bilinear: Callable[[NDArrayLike, NDArrayLike], NDArrayLike],
@@ -128,19 +136,45 @@ class IntervalArithmetic():
 
         return custom_bilinear(a, b, bilinear, assume_product, self.np_like)
 
-    ##################################### Log/Exp/Power Operations ############################
+    ##################################### Trig/Log/Exp/Power Operations ############################
 
     def tanh(self, a: Union[NDArrayLike, IntervalLike]) -> Union[NDArray, Interval]:
         if self._is_interval(a):
             return self.np_like.tanh(a[0]), self.np_like.tanh(a[1])
         return self.np_like.tanh(a)
 
+    def sqrt(self, a: Union[NDArrayLike, IntervalLike]) -> Union[NDArray, Interval]:
+        if self._is_interval(a):
+            return self.np_like.sqrt(a[0]), self.np_like.sqrt(a[1])
+        return self.np_like.sqrt(a)
+
     ##################################### Reduction/Expansion Operations #######################
 
-    def sum(self, a: Union[NDArrayLike, IntervalLike], axis: int = 0):
+    def sum(self, a: Union[NDArrayLike, IntervalLike], axes: int = 0):
         if self._is_interval(a):
-            return self.np_like.sum(a[0], axis), self.np_like.sum(a[1], axis)
-        return self.np_like.sum(a, axis)
+            return self.np_like.sum(a[0], axes), self.np_like.sum(a[1], axes)
+        return self.np_like.sum(a, axes)
+
+    def slice(self, a: Union[NDArrayLike, IntervalLike], *args, **kwargs):
+        if self._is_interval(a):
+            return utils.slice(self.np_like, a[0], args, kwargs), utils.slice(self.np_like, a[1], args, kwargs)
+        return utils.slice(self.np_like, a, args, kwargs)
+
+    def squeeze(self, a: Union[NDArrayLike, IntervalLike], axis=None) -> Union[NDArrayLike, IntervalLike]:
+        if self._is_interval(a):
+            return self.np_like.squeeze(a[0], axis), self.np_like.squeeze(a[1], axis)
+        return self.np_like.squeeze(a, axis)
+
+    def pad(self, a: Union[NDArrayLike, IntervalLike],  pad_width, mode='constant', **kwargs) -> Union[NDArrayLike, IntervalLike]:
+        if self._is_interval(a):
+            return self.np_like.pad(a[0], pad_width, mode, kwargs), self.np_like.pad(a[1], pad_width, mode, kwargs)
+        return self.np_like.pad(a, pad_width, mode, kwargs)
+
+    def broadcast_in_dim(self, operand, *args, **kwargs):
+        if self._is_interval(operand):
+            return utils.broadcast_in_dim(self.np_like, operand[0], args, kwargs), \
+                   utils.broadcast_in_dim(self.np_like, operand[1], args, kwargs)
+        return utils.broadcast_in_dim(self.np_like, operand, args, kwargs)
 
     ##################################### Transformation Operations ########################
 

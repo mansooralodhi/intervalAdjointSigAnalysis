@@ -146,6 +146,12 @@ class NumpyLike(Protocol):
     @abstractmethod
     def greater(self, a, b): pass
 
+    @abstractmethod
+    def squeeze(self, param, axis): pass
+
+    @abstractmethod
+    def pad(self, *args, **kwargs): pass
+
 
 if __name__ == '__main__':
     import numpy as np
