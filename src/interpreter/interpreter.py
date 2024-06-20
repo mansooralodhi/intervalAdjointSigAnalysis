@@ -29,8 +29,8 @@ import jax
 from jax import core
 from jax._src.util import safe_map
 from jax.experimental.pjit import pjit_p
-from src.custom_interpreter.registry import registry
-from jax.custom_derivatives import custom_jvp_call_p, custom_jvp_call_jaxpr_p
+from src.interpreter.registry import registry
+from jax.custom_derivatives import custom_vjp_call_p, custom_vjp_call_jaxpr_p
 
 
 
@@ -66,13 +66,13 @@ class Interpreter(object):
 
             inVarValues = safe_map(read, eqn.invars)
 
-            if eqn.primitive == custom_jvp_call_p:
+            if eqn.primitive == custom_vjp_call_p:
                 sub_closedJaxpr = eqn.params['call_jaxpr']
                 outVarValues = self.safe_interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
                 outVarValues = outVarValues if isinstance(outVarValues, list|tuple) else [outVarValues]
 
-            elif eqn.primitive == custom_jvp_call_jaxpr_p:
-                sub_closedJaxpr = eqn.params['']
+            elif eqn.primitive == custom_vjp_call_jaxpr_p:
+                sub_closedJaxpr = eqn.params['fun_jaxpr']
                 outVarValues = self.safe_interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, inVarValues)
                 outVarValues = outVarValues if isinstance(outVarValues, list|tuple) else [outVarValues]
 
@@ -82,17 +82,13 @@ class Interpreter(object):
                 outVarValues = outVarValues if isinstance(outVarValues, list|tuple) else [outVarValues]
 
             elif eqn.primitive in self.registry:
-                try:
-                    outVarValues = [self.registry[eqn.primitive](*inVarValues, **eqn.params)]
-                except:
+                from jax import lax
+                if eqn.primitive == lax.pad_p:
                     print()
-                # if isinstance(outVarValues, tuple):
-                #     if not all(outVarValues[0] <= outVarValues[1]):
-                #         print()
-                # the below statement write the lb and ub twice:
-                # outVarValues = outVarValues if isinstance(outVarValues, list|tuple) else [outVarValues]
+                outVarValues = [self.registry[eqn.primitive](*inVarValues, **eqn.params)]
 
             else:
+                print(eqn.primitive)
                 raise NotImplementedError(f"{eqn.primitive} does not have registered interval equivalent.")
 
             safe_map(write, eqn.outvars, outVarValues)

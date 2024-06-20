@@ -1,7 +1,7 @@
 
 import jax
 from typing import Sequence
-from src.custom_interpreter.transform import interval_transformation
+from src.interpreter.transformations import interval_transformation
 
 
 def f_scalar_valued(x1: float, x2: float, x3: float) -> float:
@@ -22,7 +22,7 @@ def K_adjoints(scalar_f, *scalarArgs, ivalArgs=None, wrt=0):
 def K_vjp(vector_f, *scalarArgs, ivalArgs=None, seed: tuple = None):
     # todo:     the problem is that jax.vjp uses the function as well as scalarArgs or primals,
     #           consequently, the vjpFun later use the same primals and an additional contangent vector
-    #           hence, we cannot replace the scalarArgs with ivalArg even with custom_interpreter.
+    #           hence, we cannot replace the scalarArgs with ivalArg even with interpreter.
     #           we cannot use ivalArgs as seed !
     scalarPrimalsOut, vjpFun = jax.vjp(vector_f, *scalarArgs)
     return interval_transformation(vjpFun)(seed)

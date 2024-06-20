@@ -1,8 +1,7 @@
 
 from jax import lax
 import jax.numpy as jnp
-import numpy as np
-from src.custom_interpreter.ivalOps.ivalArithmetic import IntervalArithmetic
+from src.interval_arithmetic import IntervalArithmetic
 
 ivalHandler = IntervalArithmetic(jnp)
 

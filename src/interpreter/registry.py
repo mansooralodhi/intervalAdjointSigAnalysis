@@ -5,7 +5,7 @@ from typing import Dict
 from jax._src.ad_util import add_jaxvals_p
 
 
-from src.custom_interpreter.ivalOps.ivalArithmetic import IntervalArithmetic
+from src.interval_arithmetic.intervalArithmetic import IntervalArithmetic
 
 ivalOps = IntervalArithmetic(jax.numpy)
 
@@ -24,6 +24,7 @@ def registry() -> Dict:
 
     ################################### Static Operations ###############################
     registry[lax.device_put_p] = jax.device_put
+    registry[lax.convert_element_type_p] = ivalOps.convert_element_type
 
     ################################### Custom Operations ###############################
     registry[lax.neg_p] = ivalOps.negative

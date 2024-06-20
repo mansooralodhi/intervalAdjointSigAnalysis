@@ -3,7 +3,7 @@
 from typing import Union
 from abc import abstractmethod
 from typing_extensions import Protocol, runtime_checkable
-from src.custom_interpreter.ivalOps.ndarray import NDArray
+from src.interval_arithmetic.ndarray import NDArray
 
 """
 Key Features:
@@ -151,6 +151,9 @@ class NumpyLike(Protocol):
 
     @abstractmethod
     def pad(self, *args, **kwargs): pass
+
+    @abstractmethod
+    def astype(self, *args, **kwargs): pass
 
 
 if __name__ == '__main__':

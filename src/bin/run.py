@@ -1,6 +1,6 @@
 import jax
 from src.model.runtime import ModelRuntime
-from src.custom_interpreter.interpret_v0 import safe_interpret
+from src.interpreter.interpret_v0 import safe_interpret
 from functools import wraps
 
 modelRuntime = ModelRuntime()

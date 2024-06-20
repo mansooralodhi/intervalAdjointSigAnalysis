@@ -1,9 +1,9 @@
 from functools import partial
 from typing import Union, Callable
 
-from src.custom_interpreter.ivalOps import utils
-from src.custom_interpreter.ivalOps.bilinearfn import custom_bilinear
-from src.custom_interpreter.ivalOps.numpyLike import (NDArray, NDArrayLike, Interval, IntervalLike, NumpyLike)
+from src.interval_arithmetic import utils
+from src.interval_arithmetic.bilinearfn import custom_bilinear
+from src.interval_arithmetic.numpyLike import (NDArray, NDArrayLike, Interval, IntervalLike, NumpyLike)
 
 """
 Source: https://github.com/google/autobound/blob/3013a1030834b686f1bbb97ac9c2d825e51b0b7d/autobound/interval_arithmetic.py#L285
@@ -157,24 +157,26 @@ class IntervalArithmetic():
 
     def slice(self, a: Union[NDArrayLike, IntervalLike], *args, **kwargs):
         if self._is_interval(a):
-            return utils.slice(self.np_like, a[0], args, kwargs), utils.slice(self.np_like, a[1], args, kwargs)
-        return utils.slice(self.np_like, a, args, kwargs)
+            return utils.slice(self.np_like, a[0], *args, **kwargs), utils.slice(self.np_like, a[1], *args, **kwargs)
+        return utils.slice(self.np_like, a, *args, **kwargs)
 
-    def squeeze(self, a: Union[NDArrayLike, IntervalLike], axis=None) -> Union[NDArrayLike, IntervalLike]:
+    def squeeze(self, a: Union[NDArrayLike, IntervalLike], dimensions=None) -> Union[NDArrayLike, IntervalLike]:
         if self._is_interval(a):
-            return self.np_like.squeeze(a[0], axis), self.np_like.squeeze(a[1], axis)
-        return self.np_like.squeeze(a, axis)
+            return self.np_like.squeeze(a[0], axis=dimensions), self.np_like.squeeze(a[1], axis=dimensions)
+        return self.np_like.squeeze(a, axis=dimensions)
 
-    def pad(self, a: Union[NDArrayLike, IntervalLike],  pad_width, mode='constant', **kwargs) -> Union[NDArrayLike, IntervalLike]:
+    def pad(self, a: Union[NDArrayLike, IntervalLike], pad_width, **kwargs) -> Union[NDArrayLike, IntervalLike]:
+        # fixme: use the padding_config in kwargs to correctly configure the padding.
+        pad_width = pad_width.astype(self.np_like.int32)
         if self._is_interval(a):
-            return self.np_like.pad(a[0], pad_width, mode, kwargs), self.np_like.pad(a[1], pad_width, mode, kwargs)
-        return self.np_like.pad(a, pad_width, mode, kwargs)
+            return self.np_like.pad(a[0], pad_width), self.np_like.pad(a[1], pad_width)
+        return self.np_like.pad(a, pad_width)
 
-    def broadcast_in_dim(self, operand, *args, **kwargs):
-        if self._is_interval(operand):
-            return utils.broadcast_in_dim(self.np_like, operand[0], args, kwargs), \
-                   utils.broadcast_in_dim(self.np_like, operand[1], args, kwargs)
-        return utils.broadcast_in_dim(self.np_like, operand, args, kwargs)
+    def broadcast_in_dim(self, a: Union[NDArrayLike, IntervalLike], *args, **kwargs):
+        if self._is_interval(a):
+            return utils.broadcast_in_dim(self.np_like, a[0], args, **kwargs), \
+                   utils.broadcast_in_dim(self.np_like, a[1], args, **kwargs)
+        return utils.broadcast_in_dim(self.np_like, a, *args, **kwargs)
 
     ##################################### Transformation Operations ########################
 
@@ -183,6 +185,12 @@ class IntervalArithmetic():
             return self.np_like.transpose(a[0], permutation), self.np_like.transpose(a[1], permutation)
         return self.np_like.transpose(a, permutation)
 
+    #####################################       Utils            ########################
+
+    def convert_element_type(self, a: Union[NDArray, Interval], new_dtype, weak_type=None) -> Union[NDArray, Interval]:
+        if self._is_interval(a):
+            return self.np_like.astype(a[0], new_dtype), self.np_like.astype(a[1], new_dtype)
+        return self.np_like.astype(a, new_dtype)
 
 if __name__ == "__main__":
     import numpy as np

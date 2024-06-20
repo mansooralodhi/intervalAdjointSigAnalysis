@@ -1,7 +1,7 @@
 
 import jax
 from flax import linen
-from src.custom_interpreter.interpreter import Interpreter
+from src.interpreter.interpreter import Interpreter
 
 interpreter = Interpreter()
 

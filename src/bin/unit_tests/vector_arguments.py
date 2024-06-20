@@ -1,8 +1,9 @@
 
 import jax
 from typing import Sequence
-from src.custom_interpreter.interpreter import Interpreter
+from src.interpreter.interpreter import Interpreter
 
+from functools import wraps
 
 interpreter = Interpreter()
 
@@ -11,7 +12,7 @@ def f_scalar_valued(x_active: Sequence[float], x_passive: Sequence[float]) -> fl
 
 def f_vector_valued(x_active: Sequence[float], x_passive: Sequence[float]) -> Sequence[float]:
     y1 = x_active[0]*x_passive[0]*x_active[1] + 5*x_active[0]*x_passive[1]*x_active[1] + x_passive[0]*x_passive[1]*x_active[2]
-    y2 = x[0]*x[0]*x[2] - x[1]*x[1]*x[2] + x[0]*x[1]*x[2]
+    y2 = x_active[0]*x_active[0]*x_active[2] - x_active[1]*x_active[1]*x_active[2] + x_active[0]*x_active[1]*x_active[2]
     return y1, y2
 
 def J_primals(scalar_f, *args):
@@ -38,15 +39,28 @@ def K_vjp(scalar_f, *args, seed: tuple = None):
     return interpreter.safe_interpret(expr.jaxpr, expr.literals, seed)
 
 
+def interval(fun):
+  @wraps(fun)
+  def wrapped(*args, intervals=None, **kwargs):
+    # Since we assume unary functions, we won't worry about flattening and
+    # unflattening arguments.
+    closed_jaxpr = jax.make_jaxpr(fun)(*args, **kwargs)
+    out =  interpreter.safe_interpret(closed_jaxpr.jaxpr, closed_jaxpr.literals, intervals)
+    return out
+  return wrapped
+
+
 adjWrt: int = 0                     # trying changing it from 0 to 2 and observe the difference.
 primalsIn: tuple = ((3.0, 4.0), (5.0), )
 seed_m: tuple = (1.0, 0.0)           # NB: len(seed_m) = len(f(primals))
 
-print(f"J_primals   f-scalar     =  {J_primals(f_scalar_valued, primalsIn)}")
-print(f"J_adjoints  f-scalar     =  {J_adjoints(f_scalar_valued, primalsIn, wrt=adjWrt)}")
-print(f"J_vjp       f-vector     =  {J_vjp(f_vector_valued, primalsIn, seed=seed_m)}")
-print(f"K_primals   f-scalar     =  {K_primals(f_scalar_valued, primalsIn)}")
-print(f"K_adjoint   f-scalar     =  {K_adjoints(f_scalar_valued, primalsIn, wrt=adjWrt)}")
-print(f"K_vjp       f-vector     =  {K_vjp(f_vector_valued, primalsIn, seed=seed_m)}")
+# print(f"J_primals   f-scalar     =  {J_primals(f_scalar_valued, primalsIn)}")
+# print(f"J_adjoints  f-scalar     =  {J_adjoints(f_scalar_valued, primalsIn, wrt=adjWrt)}")
+# print(f"J_vjp       f-vector     =  {J_vjp(f_vector_valued, primalsIn, seed=seed_m)}")
+# print(f"K_primals   f-scalar     =  {K_primals(f_scalar_valued, primalsIn)}")
+# print(f"K_adjoint   f-scalar     =  {K_adjoints(f_scalar_valued, primalsIn, wrt=adjWrt)}")
+# print(f"K_vjp       f-vector     =  {K_vjp(f_vector_valued, primalsIn, seed=seed_m)}")
 
+
+interval(jax.jacrev(f_vector_valued), primalsIn)
 

@@ -1,7 +1,7 @@
 import jax
 import jax.numpy as jnp
 from jax import random as rnd
-from src.custom_interpreter.interpreter import Interpreter
+from src.interpreter.interpreter import Interpreter
 
 def vjp(x):
     primal, model_vjp = jax.vjp(model, x)

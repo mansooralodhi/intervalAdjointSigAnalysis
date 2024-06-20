@@ -1,7 +1,7 @@
 
 import jax.numpy as jnp
 from jax import random as rand
-
+from src.derivation_rules.vjp_rules.relu import relu_fwd
 
 def x_active():
     k = rand.key(0)
@@ -14,12 +14,13 @@ def x_active():
     return x, w1, b1, w2, b2
 
 def loss(x):
-    x = x[0]
     x_in, w1, b1, w2, b2 = x
     v0 = jnp.dot(w1, x_in) + b1
     v1 = jnp.dot(v0, w2) + b2
     v3 = jnp.linalg.norm(v1)
     return v3
+
+
 
 
 if __name__ == "__main__":
