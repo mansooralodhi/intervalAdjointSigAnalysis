@@ -155,6 +155,9 @@ class NumpyLike(Protocol):
     @abstractmethod
     def astype(self, *args, **kwargs): pass
 
+    @abstractmethod
+    def equal(self, x1, x2): pass
+
 
 if __name__ == '__main__':
     import numpy as np

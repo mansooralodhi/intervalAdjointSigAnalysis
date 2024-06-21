@@ -42,17 +42,17 @@ class IntervalArithmetic():
     ###################################### Conditional Operations #############################
 
     def maximum(self, a: Union[NDArrayLike, IntervalLike], b: NDArrayLike) -> Union[NDArray, Interval]:
-        if self._is_interval(a) and isinstance(b, NDArrayLike):
+        if self._is_interval(a):
             return self.np_like.maximum(a[0], b), self.np_like.maximum(a[1], b)
         return self.np_like.maximum(a, b)
 
     def minimum(self, a: Union[NDArrayLike, IntervalLike], b: NDArrayLike) -> Union[NDArray, Interval]:
-        if self._is_interval(a) and isinstance(b, NDArrayLike):
+        if self._is_interval(a):
             return self.np_like.minimum(a[0], b), self.np_like.minimum(a[1], b)
         return self.np_like.minimum(a, b)
 
     def greater_than(self, a: Union[NDArrayLike, IntervalLike], b: NDArrayLike) -> Union[NDArray, Interval]:
-        if self._is_interval(a) and isinstance(b, NDArrayLike):
+        if self._is_interval(a):
             return self.np_like.greater(a[0], b), self.np_like.greater(a[1], b)
         return self.np_like.greater(a, b)
 
@@ -60,10 +60,27 @@ class IntervalArithmetic():
         if self._is_interval(which):
             # fixme (fixed): this is to handle the special case of Relu activation function.
             #  Otherwise an improper interval is returned which don't follow the lb<up criteria.
-            lb, ub = (self.np_like.choose(which[0].astype('int'), cases, mode='clip'),
-                      self.np_like.choose(which[1].astype('int'), cases, mode='clip'))
+            lb, ub = (self.np_like.choose(which[0].astype('int'), cases, mode='wrap'),
+                      self.np_like.choose(which[1].astype('int'), cases, mode='wrap'))
             return lb, ub
         return self.np_like.choose(which.astype('int'), cases, mode='wrap')
+
+    def equal(self, a: Union[NDArrayLike, IntervalLike], b: Union[NDArrayLike, IntervalLike]) -> Union[
+        NDArrayLike, IntervalLike]:
+        a_is_interval = isinstance(a, tuple)
+        b_is_interval = isinstance(b, tuple)
+
+        if a_is_interval and b_is_interval:
+            return self.np_like.equal(a[0], b[0]), self.np_like.equal(a[1], b[1])
+
+        elif a_is_interval:
+            return self.np_like.equal(a[0], b), self.np_like.equal(a[1], b)
+
+        elif b_is_interval:
+            return self.np_like.equal(a, b[0]), self.np_like.equal(a, b[1])
+
+        else:
+            return self.np_like.equal(a, b)
 
     ####################################### Arithmetic Operations ############################
 
@@ -165,7 +182,8 @@ class IntervalArithmetic():
             return self.np_like.squeeze(a[0], axis=dimensions), self.np_like.squeeze(a[1], axis=dimensions)
         return self.np_like.squeeze(a, axis=dimensions)
 
-    def pad(self, a: Union[NDArrayLike, IntervalLike], pad_width, **kwargs) -> Union[NDArrayLike, IntervalLike]:
+    def pad(self, a: Union[NDArrayLike, IntervalLike], pad_width, padding_config=None) -> Union[
+        NDArrayLike, IntervalLike]:
         # fixme: use the padding_config in kwargs to correctly configure the padding.
         pad_width = pad_width.astype(self.np_like.int32)
         if self._is_interval(a):
@@ -174,8 +192,8 @@ class IntervalArithmetic():
 
     def broadcast_in_dim(self, a: Union[NDArrayLike, IntervalLike], *args, **kwargs):
         if self._is_interval(a):
-            return utils.broadcast_in_dim(self.np_like, a[0], args, **kwargs), \
-                   utils.broadcast_in_dim(self.np_like, a[1], args, **kwargs)
+            return utils.broadcast_in_dim(self.np_like, a[0], *args, **kwargs), \
+                   utils.broadcast_in_dim(self.np_like, a[1], *args, **kwargs)
         return utils.broadcast_in_dim(self.np_like, a, *args, **kwargs)
 
     ##################################### Transformation Operations ########################
@@ -185,12 +203,21 @@ class IntervalArithmetic():
             return self.np_like.transpose(a[0], permutation), self.np_like.transpose(a[1], permutation)
         return self.np_like.transpose(a, permutation)
 
+    def reshape(self, a: Union[NDArrayLike, IntervalLike], **kwargs):
+        if self._is_interval(a):
+            return self.np_like.reshape(a[0], kwargs['new_sizes']), self.np_like.reshape(a[1], kwargs['new_sizes'])
+        return self.np_like.reshape(a, kwargs['new_sizes'])
+
     #####################################       Utils            ########################
 
     def convert_element_type(self, a: Union[NDArray, Interval], new_dtype, weak_type=None) -> Union[NDArray, Interval]:
         if self._is_interval(a):
             return self.np_like.astype(a[0], new_dtype), self.np_like.astype(a[1], new_dtype)
         return self.np_like.astype(a, new_dtype)
+
+    def iota(self, dimension, dtype, shape):
+        return utils.iota(self.np_like, dimension, dtype, shape)
+
 
 if __name__ == "__main__":
     import numpy as np

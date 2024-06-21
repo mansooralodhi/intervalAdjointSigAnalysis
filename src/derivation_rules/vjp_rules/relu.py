@@ -2,7 +2,7 @@
 import jax
 from jax import nn
 import jax.numpy as jnp
-from jax import custom_vjp
+from jax import custom_vjp, jit
 
 # todo: modify it to work for intervals as well as scalar inputs
 
