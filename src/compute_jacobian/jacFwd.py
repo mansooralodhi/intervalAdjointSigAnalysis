@@ -12,6 +12,6 @@ y = loss(scalar_x, params)
 print(y)
 print("-"*50)
 
-y = scalar_interpret(loss)(input_parameters=scalar_x, model_parameters=params)
+y = scalar_interpret(loss)(scalar_x, params)
 y = interval_interpret(loss)(ival_x, scalar_x, params)
 

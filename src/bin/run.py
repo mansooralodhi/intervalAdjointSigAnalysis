@@ -1,6 +1,6 @@
 import jax
 from src.model.runtime import ModelRuntime
-from src.site_packages.custom_interpreter import safe_interpret
+from src.site_packages.custom_interpreter import safe_interpreter
 from functools import wraps
 
 modelRuntime = ModelRuntime()
@@ -20,10 +20,10 @@ featureIval = (featuresInterval[0], featuresInterval[1])  # it's necessary to pa
 # print("-"*50)
 # flatParams, _ = jax.tree_flatten(params)
 # flatParams.insert(0, x)
-# x_est_loss = safe_interpret(expr.jaxpr, expr.literals, flatParams)[0]
+# x_est_loss = safe_interpreter(expr.jaxpr, expr.literals, flatParams)[0]
 # flatParams, _ = jax.tree_flatten(params)
 # flatParams.insert(0, featureIval)
-# ival_est_loss = safe_interpret(expr.jaxpr, expr.literals, flatParams)[0]
+# ival_est_loss = safe_interpreter(expr.jaxpr, expr.literals, flatParams)[0]
 #
 # print(f"Actual Loss: {loss}\n"
 #       f"Interpreted Loss: {x_est_loss}\n"
@@ -36,10 +36,10 @@ featureIval = (featuresInterval[0], featuresInterval[1])  # it's necessary to pa
 # print(expr)
 # flatParams, _ = jax.tree_flatten(params)
 # flatParams.insert(0, x)
-# x_est_adjoint = safe_interpret(expr.jaxpr, expr.literals, flatParams)[0]
+# x_est_adjoint = safe_interpreter(expr.jaxpr, expr.literals, flatParams)[0]
 # flatParams, _ = jax.tree_flatten(params)
 # flatParams.insert(0, featureIval)
-# ival_est_adjoint = safe_interpret(expr.jaxpr, expr.literals, flatParams)[0]
+# ival_est_adjoint = safe_interpreter(expr.jaxpr, expr.literals, flatParams)[0]
 #
 # adjoint_bounded = jax.numpy.dot((x_est_adjoint - ival_est_adjoint[0]),(x_est_adjoint - ival_est_adjoint[1])) < 0
 # print(f" Are adjoints bounded ? {adjoint_bounded}")
@@ -68,13 +68,13 @@ def interval(fun):
   def wrapped(x, params, intervals=None):
     closed_jaxpr = jax.make_jaxpr(fun)(x, params)
     args = concatenate_args(intervals, params)
-    out = safe_interpret(closed_jaxpr.jaxpr, closed_jaxpr.literals, args)
+    out = safe_interpreter(closed_jaxpr.jaxpr, closed_jaxpr.literals, args)
     return out
   return wrapped
 
 ival_f = interval(jax.grad(f))
 expr = jax.make_jaxpr(ival_f)(x, params, intervals=featureIval)
 print(expr)
-out = safe_interpret(expr.jaxpr, expr.literals, concatenate_args_v1(featureIval, params))
+out = safe_interpreter(expr.jaxpr, expr.literals, concatenate_args_v1(featureIval, params))
 # print(out)
 

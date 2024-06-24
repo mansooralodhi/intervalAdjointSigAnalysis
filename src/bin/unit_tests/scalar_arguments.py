@@ -26,16 +26,16 @@ def J_vjp(scalar_f, *args, seed: tuple = None):
 
 def K_primals(scalar_f, *args):
     expr = jax.make_jaxpr(scalar_f)(*args)
-    return interpreter.safe_interpret(expr.jaxpr, expr.literals, [*args])[0]
+    return interpreter.safe_interpreter(expr.jaxpr, expr.literals, [*args])[0]
 
 def K_adjoints(scalar_f, *args, wrt: int = 0):
     expr = jax.make_jaxpr(jax.grad(scalar_f, wrt))(*args)
-    return interpreter.safe_interpret(expr.jaxpr, expr.literals, [*args])[0]
+    return interpreter.safe_interpreter(expr.jaxpr, expr.literals, [*args])[0]
 
 def K_vjp(scalar_f, *args, seed: tuple = None):
     primals_out, vjp_fun = jax.vjp(scalar_f, *args)
     expr = jax.make_jaxpr(vjp_fun)(seed)
-    return interpreter.safe_interpret(expr.jaxpr, expr.literals, seed)
+    return interpreter.safe_interpreter(expr.jaxpr, expr.literals, seed)
 
 
 if __name__ == "__main__":

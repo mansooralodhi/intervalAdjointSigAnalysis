@@ -1,6 +1,6 @@
 import jax
 from src.model.runtime import ModelRuntime
-from src.site_packages.custom_interpreter import safe_interpret
+from src.site_packages.custom_interpreter import safe_interpreter
 
 """
 Compute primals and adjoints with scalar inputs and compare the results with jax methods.
@@ -19,7 +19,7 @@ class InterValidator(object):
         expr = self.modelRuntime.primal_jaxpr(self.x, self.params)
         flatParams, _ = jax.tree_flatten(self.params)
         flatParams.insert(0, self.x)
-        x_est_loss = safe_interpret(expr.jaxpr, expr.literals, flatParams)[0]
+        x_est_loss = safe_interpreter(expr.jaxpr, expr.literals, flatParams)[0]
         if round(loss, 3) == round(x_est_loss, 3):
             print("Scalar Primals Verified !")
         else:
@@ -33,7 +33,7 @@ class InterValidator(object):
         expr = self.modelRuntime.adjoint_jaxpr(self.x, self.params, wrt_arg=0)
         flatParams, _ = jax.tree_flatten(self.params)
         flatParams.insert(0, self.x)
-        x_est_adjoint = safe_interpret(expr.jaxpr, expr.literals, flatParams)[0]
+        x_est_adjoint = safe_interpreter(expr.jaxpr, expr.literals, flatParams)[0]
         if all(adjoints == x_est_adjoint):
             print("Scalar Adjoints Verified !")
         else:

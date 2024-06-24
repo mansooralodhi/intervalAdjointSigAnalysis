@@ -41,7 +41,7 @@ print('-' * 50)
 t_grad = jax.jacrev(loss)(x, params)
 
 expr = jax.make_jaxpr(jax.jacrev(loss))(x, params)
-y_grad = interpret.safe_interpret(expr.jaxpr, expr.literals, [x, *params])
+y_grad = interpret.safe_interpreter(expr.jaxpr, expr.literals, [x, *params])
 
 print(t_grad)
 print('-' * 50)
@@ -49,16 +49,16 @@ print('-' * 50)
 print(y_grad)
 print('-' * 50)
 
-y_grad = interpret.safe_interpret(expr.jaxpr, expr.literals, [x_ival, *params])
+y_grad = interpret.safe_interpreter(expr.jaxpr, expr.literals, [x_ival, *params])
 print(y_grad)
 print('-' * 50)
 
-y_grad = interpret.safe_interpret(expr.jaxpr, expr.literals, [x_ival[0], *params])
+y_grad = interpret.safe_interpreter(expr.jaxpr, expr.literals, [x_ival[0], *params])
 
 print(y_grad)
 print('-' * 50)
 
-y_grad = interpret.safe_interpret(expr.jaxpr, expr.literals, [x_ival[1], *params])
+y_grad = interpret.safe_interpreter(expr.jaxpr, expr.literals, [x_ival[1], *params])
 
 print(y_grad)
 print('-' * 50)

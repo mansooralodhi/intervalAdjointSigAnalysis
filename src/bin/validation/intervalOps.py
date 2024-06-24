@@ -7,7 +7,7 @@ import jax
 from torchvision.datasets import MNIST
 from src.model.dataset import Dataset
 from src.model.runtime import ModelRuntime
-from src.site_packages.custom_interpreter import safe_interpret
+from src.site_packages.custom_interpreter import safe_interpreter
 
 from tqdm import tqdm
 
@@ -53,7 +53,7 @@ class IntervalOpsValidator(object):
         # add feature interval with params
         flatParams.insert(0, featureIval)
         # interpret jax expr with interval input and scalar params
-        ival_adjoints = safe_interpret(expr.jaxpr, expr.literals, flatParams)
+        ival_adjoints = safe_interpreter(expr.jaxpr, expr.literals, flatParams)
         return ival_adjoints
 
 

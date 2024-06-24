@@ -27,16 +27,16 @@ def J_vjp(scalar_f, *args, seed: tuple = None):
 
 def K_primals(scalar_f, args):
     expr = jax.make_jaxpr(scalar_f)(args)
-    return interpreter.safe_interpret(expr.jaxpr, expr.literals, [*args])[0]
+    return interpreter.safe_interpreter(expr.jaxpr, expr.literals, [*args])[0]
 
 def K_adjoints(scalar_f, args, wrt: int = 0):
     expr = jax.make_jaxpr(jax.grad(scalar_f, wrt))(args)
-    return interpreter.safe_interpret(expr.jaxpr, expr.literals, [*args])[0]
+    return interpreter.safe_interpreter(expr.jaxpr, expr.literals, [*args])[0]
 
 def K_vjp(scalar_f, *args, seed: tuple = None):
     primals_out, vjp_fun = jax.vjp(scalar_f, *args)
     expr = jax.make_jaxpr(vjp_fun)(seed)
-    return interpreter.safe_interpret(expr.jaxpr, expr.literals, seed)
+    return interpreter.safe_interpreter(expr.jaxpr, expr.literals, seed)
 
 
 def interval(fun):
@@ -45,7 +45,7 @@ def interval(fun):
     # Since we assume unary functions, we won't worry about flattening and
     # unflattening arguments.
     closed_jaxpr = jax.make_jaxpr(fun)(*args, **kwargs)
-    out =  interpreter.safe_interpret(closed_jaxpr.jaxpr, closed_jaxpr.literals, intervals)
+    out =  interpreter.safe_interpreter(closed_jaxpr.jaxpr, closed_jaxpr.literals, intervals)
     return out
   return wrapped
 

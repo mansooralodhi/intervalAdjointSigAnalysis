@@ -35,7 +35,7 @@ from typing import Union
 from src.site_packages.interval_arithmetic.numpyLike import Interval, NDArray
 
 
-def safe_interpret(jaxpr: jax.make_jaxpr, literals: list, *args: Union[Interval, NDArray]) -> object:
+def safe_interpreter(jaxpr: jax.make_jaxpr, literals: list, *args: Union[Interval, NDArray]) -> object:
     """
     jaxpr attributes:
         constvars | invars | eqns (iterated) | outvars (ignored)
@@ -64,17 +64,17 @@ def safe_interpret(jaxpr: jax.make_jaxpr, literals: list, *args: Union[Interval,
 
         if eqn.primitive in [custom_vjp_call_p, custom_jvp_call_p]:
             sub_closedJaxpr = eqn.params['call_jaxpr']
-            outVarValues = safe_interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
+            outVarValues = safe_interpreter(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
             outVarValues = outVarValues if isinstance(outVarValues, list | tuple) else [outVarValues]
 
         elif eqn.primitive == custom_vjp_call_jaxpr_p:
             sub_closedJaxpr = eqn.params['fun_jaxpr']
-            outVarValues = safe_interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
+            outVarValues = safe_interpreter(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
             outVarValues = outVarValues if isinstance(outVarValues, list | tuple) else [outVarValues]
 
         elif eqn.primitive == pjit_p:
             sub_closedJaxpr = eqn.params['jaxpr']
-            outVarValues = safe_interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
+            outVarValues = safe_interpreter(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
             outVarValues = outVarValues if isinstance(outVarValues, list | tuple) else [outVarValues]
 
         elif eqn.primitive in registry:
@@ -90,4 +90,4 @@ def safe_interpret(jaxpr: jax.make_jaxpr, literals: list, *args: Union[Interval,
 
 
 if __name__ == "__main__":
-    safe_interpret()
+    safe_interpreter()
