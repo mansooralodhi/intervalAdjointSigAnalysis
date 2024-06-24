@@ -5,7 +5,7 @@ from typing import Dict
 from jax._src.ad_util import add_jaxvals_p
 
 
-from src.interval_arithmetic.intervalArithmetic import IntervalArithmetic
+from src.site_packages.interval_arithmetic.intervalArithmetic import IntervalArithmetic
 
 ivalOps = IntervalArithmetic(jax.numpy)
 
@@ -14,7 +14,7 @@ def registry() -> Dict:
     registry = dict()
 
     ################################# Recursive Operations ##############################
-    ###  Now handled by the custom interpreter !
+    ###  Now handled by the custom custom_interpreter !
     # registry[custom_jvp_call_p] = jax.custom_jvp
     # registry[jax.experimental.pjit.pjit_p] = jax.experimental.pjit
 

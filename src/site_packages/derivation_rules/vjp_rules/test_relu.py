@@ -5,8 +5,8 @@ import jax.numpy as jnp
 from jax import random, jit
 
 
-from src.interpreter.interpreter import Interpreter
-from src.derivation_rules.vjp_rules.relu import relu
+from src.site_packages.custom_interpreter.interpreter import Interpreter
+from src.site_packages.derivation_rules.vjp_rules.relu import relu
 
 interpret = Interpreter()
 

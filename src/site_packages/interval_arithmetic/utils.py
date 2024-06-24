@@ -1,3 +1,5 @@
+
+
 import builtins
 
 _slice = builtins.slice
@@ -42,19 +44,16 @@ def iota(np_like, dimension, dtype, shape):
 def lax2numpy_pad(np_like, array, padding_config, padding_value):
     pad_width = [(low, high) for low, high, _ in padding_config]
     padded_array = np_like.pad(array, pad_width, mode='constant', constant_values=padding_value)
-
     for dim, (low, high, interior) in enumerate(padding_config):
         if interior > 0:
             # Interleave zeros in the padded_array along the specified dimension
             shape = list(padded_array.shape)
             new_shape = shape[:dim] + [shape[dim] * (interior + 1) - interior] + shape[dim + 1:]
             interleaved_array = np_like.zeros(new_shape, dtype=padded_array.dtype)
-
             indices = [_slice(None)] * len(shape)
             for i in range(shape[dim]):
                 indices[dim] = _slice(i * (interior + 1), i * (interior + 1) + 1)
                 interleaved_array[tuple(indices)] = padded_array[
                     tuple([_slice(None) if d != dim else _slice(i, i + 1) for d in range(len(shape))])]
             padded_array = interleaved_array
-
     return padded_array

@@ -1,17 +1,17 @@
 
 
 """
-Unit test following scenarios with custom interpreter:
+Unit test following scenarios with custom custom_interpreter:
 -----------------------------------------------------
     - scalar and interval args:
         - scalar-valued function adjoint computation
         - vector-valued function adjoint computation  [Tricky]
-        - custom_vjp calls using custom interpreter
-        - custom_vjp_call_jaxpr calls using custom interpreter
-    - pjit calls using custom interpreter
-    - vmap calls using custom interpreter
-    - xla_call using custom interpreter [Optional]
-    - xla_pmap using custom interpreter [Optional]
+        - custom_vjp calls using custom custom_interpreter
+        - custom_vjp_call_jaxpr calls using custom custom_interpreter
+    - pjit calls using custom custom_interpreter
+    - vmap calls using custom custom_interpreter
+    - xla_call using custom custom_interpreter [Optional]
+    - xla_pmap using custom custom_interpreter [Optional]
 
 Test cases template:
 -------------------

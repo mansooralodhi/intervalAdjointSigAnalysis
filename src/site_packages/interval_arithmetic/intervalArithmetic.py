@@ -1,9 +1,9 @@
 from functools import partial
 from typing import Union, Callable
 
-from src.interval_arithmetic import utils
-from src.interval_arithmetic.bilinearfn import custom_bilinear
-from src.interval_arithmetic.numpyLike import (NDArray, NDArrayLike, Interval, IntervalLike, NumpyLike)
+from src.site_packages.interval_arithmetic import utils
+from src.site_packages.interval_arithmetic.bilinearfn import custom_bilinear
+from src.site_packages.interval_arithmetic.numpyLike import (NDArray, NDArrayLike, Interval, IntervalLike, NumpyLike)
 
 """
 Source: https://github.com/google/autobound/blob/3013a1030834b686f1bbb97ac9c2d825e51b0b7d/autobound/interval_arithmetic.py#L285

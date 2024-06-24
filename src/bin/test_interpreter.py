@@ -1,7 +1,7 @@
 import jax
 import jax.numpy as jnp
 from jax import random as rnd
-from src.interpreter.interpreter import Interpreter
+from src.site_packages.custom_interpreter import Interpreter
 
 def vjp(x):
     primal, model_vjp = jax.vjp(model, x)
@@ -26,11 +26,11 @@ if __name__ == "__main__":
     print(f"Primal = {model(x)}")
 
     # jaxepr = jax.make_jaxpr(model)(x)
-    # y = interpreter.safe_interpret(jaxepr.jaxpr, jaxepr.literals, [x])[0]
+    # y = custom_interpreter.safe_interpret(jaxepr.jaxpr, jaxepr.literals, [x])[0]
     # print(f"K_primal = {y}")
     #
     # jaxepr = jax.make_jaxpr(jax.grad(model))(x)
-    # y = interpreter.safe_interpret(jaxepr.jaxpr, jaxepr.literals, [x])[0]
+    # y = custom_interpreter.safe_interpret(jaxepr.jaxpr, jaxepr.literals, [x])[0]
     # print(f"K_primal = {y}")
 
 
@@ -39,7 +39,7 @@ if __name__ == "__main__":
     # print(f"J_adj len = {len(grad_x)}")
     #
     # jaxpr = jax.make_jaxpr(vjp)(x)
-    # y = interpreter.safe_interpret(jaxpr.jaxpr, jaxpr.literals, [x])[0]
+    # y = custom_interpreter.safe_interpret(jaxpr.jaxpr, jaxpr.literals, [x])[0]
     # print(f"K_adj len = {len(y)}")
     #
     # print(f"K_adj = J_adj ?  {all(y == grad_x)}")

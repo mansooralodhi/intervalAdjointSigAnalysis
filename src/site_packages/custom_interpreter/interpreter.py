@@ -26,15 +26,11 @@ NB: Jaxpr interpret should know if the jnp.ndarray is derived from np.ndarray(dt
 """
 
 import jax
-from jax import core
 from jax._src.util import safe_map
 from jax.experimental.pjit import pjit_p
-from src.interpreter.registry import registry
-from jax.custom_derivatives import custom_vjp_call_p, custom_vjp_call_jaxpr_p
-from jax.custom_derivatives import custom_jvp_call_p
-
-import collections
-from jax.core import Literal
+from src.site_packages.custom_interpreter.registry import registry
+from src.site_packages.custom_interpreter.utils import flatten
+from jax.custom_derivatives import custom_vjp_call_p, custom_vjp_call_jaxpr_p, custom_jvp_call_p
 
 
 class Interpreter(object):
@@ -42,7 +38,7 @@ class Interpreter(object):
     def __init__(self):
         self.registry = registry()
 
-    def safe_interpret(self, jaxpr: jax.make_jaxpr, literals: list, args: list | tuple) -> object:
+    def safe_interpret(self, jaxpr: jax.make_jaxpr, literals: list, *args) -> object:
         """
         jaxpr attributes:
             constvars | invars | eqns (iterated) | outvars (ignored)
@@ -53,12 +49,13 @@ class Interpreter(object):
             len(args) == len(jaxpr.invars)
         """
         env = {}
+        args = flatten(args)
 
         def write(vars, args):
             env[vars] = args
 
         def read(vars):
-            val = vars.val if type(vars) is core.Literal else env[vars]
+            val = vars.val if type(vars) is jax.core.Literal else env[vars]
             return val
 
         # iteratively calls write function for each element of len(const)
@@ -98,34 +95,6 @@ class Interpreter(object):
         output = safe_map(read, jaxpr.outvars)
         return output
 
-    def unsafe_interpreter(self, jaxpr, literals, inputs):
-        env = collections.defaultdict(lambda: 0.0)
-
-        def read(var):
-            if isinstance(var, Literal):
-                return var.val
-            return env[var]
-
-        def write(var, val):
-            env[var] = val
-
-        # Initialize environment with inputs and literals
-        for var, val in zip(jaxpr.invars, inputs + literals):
-            write(var, val)
-
-        # Process each equation
-        for eqn in jaxpr.eqns:
-            invals = [read(var) for var in eqn.invars]
-            if eqn.primitive in self.registry:
-                outvals = self.registry[eqn.primitive](*invals, **eqn.params)
-            if not isinstance(outvals, tuple):
-                outvals = (outvals,)
-            for var, val in zip(eqn.outvars, outvals):
-                write(var, val)
-
-        # Collect gradients
-        grads = [env[var] for var in jaxpr.outvars]
-        return grads
 
 
 if __name__ == "__main__":

@@ -7,7 +7,7 @@ import jax
 from torchvision.datasets import MNIST
 from src.model.dataset import Dataset
 from src.model.runtime import ModelRuntime
-from src.interpreter.interpret_v0 import safe_interpret
+from src.site_packages.custom_interpreter import safe_interpret
 
 from tqdm import tqdm
 

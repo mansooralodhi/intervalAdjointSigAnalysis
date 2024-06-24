@@ -1,7 +1,6 @@
 import jax
 from src.model.runtime import ModelRuntime
-from src.model.loader import ModelLoader
-from src.interpreter.interpret_v0 import safe_interpret
+from src.site_packages.custom_interpreter import safe_interpret
 
 """
 Compute primals and adjoints with scalar inputs and compare the results with jax methods.
