@@ -29,73 +29,65 @@ import jax
 from jax._src.util import safe_map
 from jax.experimental.pjit import pjit_p
 from src.site_packages.custom_interpreter.registry import registry
-from src.site_packages.custom_interpreter.utils import flatten
 from jax.custom_derivatives import custom_vjp_call_p, custom_vjp_call_jaxpr_p, custom_jvp_call_p
 
+from typing import Union
+from src.site_packages.interval_arithmetic.numpyLike import Interval, NDArray
 
-class Interpreter(object):
 
-    def __init__(self):
-        self.registry = registry()
+def safe_interpret(jaxpr: jax.make_jaxpr, literals: list, *args: Union[Interval, NDArray]) -> object:
+    """
+    jaxpr attributes:
+        constvars | invars | eqns (iterated) | outvars (ignored)
+    consts:
+        list of static params/weights
+    args:
+        list[...]
+        len(args) == len(jaxpr.invars)
+    """
+    env = {}
 
-    def safe_interpret(self, jaxpr: jax.make_jaxpr, literals: list, *args) -> object:
-        """
-        jaxpr attributes:
-            constvars | invars | eqns (iterated) | outvars (ignored)
-        consts:
-            list of static params/weights
-        args:
-            list[...]
-            len(args) == len(jaxpr.invars)
-        """
-        env = {}
-        args = flatten(args)
+    def write(vars, args):
+        env[vars] = args
 
-        def write(vars, args):
-            env[vars] = args
+    def read(vars):
+        val = vars.val if type(vars) is jax.core.Literal else env[vars]
+        return val
 
-        def read(vars):
-            val = vars.val if type(vars) is jax.core.Literal else env[vars]
-            return val
+    # iteratively calls write function for each element of len(const)
+    safe_map(write, jaxpr.invars, args)
+    safe_map(write, jaxpr.constvars, literals)
 
-        # iteratively calls write function for each element of len(const)
-        safe_map(write, jaxpr.invars, args)
-        safe_map(write, jaxpr.constvars, literals)
+    for eqn in jaxpr.eqns:
 
-        for eqn in jaxpr.eqns:
+        inVarValues = safe_map(read, eqn.invars)
 
-            inVarValues = safe_map(read, eqn.invars)
+        if eqn.primitive in [custom_vjp_call_p, custom_jvp_call_p]:
+            sub_closedJaxpr = eqn.params['call_jaxpr']
+            outVarValues = safe_interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
+            outVarValues = outVarValues if isinstance(outVarValues, list | tuple) else [outVarValues]
 
-            if eqn.primitive in [custom_vjp_call_p, custom_jvp_call_p]:
-                sub_closedJaxpr = eqn.params['call_jaxpr']
-                outVarValues = self.safe_interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, inVarValues)
-                outVarValues = outVarValues if isinstance(outVarValues, list|tuple) else [outVarValues]
+        elif eqn.primitive == custom_vjp_call_jaxpr_p:
+            sub_closedJaxpr = eqn.params['fun_jaxpr']
+            outVarValues = safe_interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
+            outVarValues = outVarValues if isinstance(outVarValues, list | tuple) else [outVarValues]
 
-            elif eqn.primitive == custom_vjp_call_jaxpr_p:
-                sub_closedJaxpr = eqn.params['fun_jaxpr']
-                outVarValues = self.safe_interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, inVarValues)
-                outVarValues = outVarValues if isinstance(outVarValues, list|tuple) else [outVarValues]
+        elif eqn.primitive == pjit_p:
+            sub_closedJaxpr = eqn.params['jaxpr']
+            outVarValues = safe_interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
+            outVarValues = outVarValues if isinstance(outVarValues, list | tuple) else [outVarValues]
 
-            elif eqn.primitive == pjit_p:
-                sub_closedJaxpr = eqn.params['jaxpr']
-                outVarValues = self.safe_interpret(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, inVarValues)
-                outVarValues = outVarValues if isinstance(outVarValues, list|tuple) else [outVarValues]
+        elif eqn.primitive in registry:
+            outVarValues = [registry[eqn.primitive](*inVarValues, **eqn.params)]
 
-            elif eqn.primitive in self.registry:
-                outVarValues = [self.registry[eqn.primitive](*inVarValues, **eqn.params)]
+        else:
+            raise NotImplementedError(f"{eqn.primitive} does not have registered interval equivalent.")
 
-            else:
-                print(eqn.primitive)
-                print(eqn.params)
-                print(*inVarValues)
-                raise NotImplementedError(f"{eqn.primitive} does not have registered interval equivalent.")
+        safe_map(write, eqn.outvars, outVarValues)
 
-            safe_map(write, eqn.outvars, outVarValues)
-
-        output = safe_map(read, jaxpr.outvars)
-        return output
-
+    output = safe_map(read, jaxpr.outvars)
+    return output
 
 
 if __name__ == "__main__":
-    Interpreter()
+    safe_interpret()

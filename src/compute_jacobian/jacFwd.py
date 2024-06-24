@@ -1,22 +1,17 @@
 
 
 
-from src.site_packages.custom_interpreter.interpreter import Interpreter
 from src.model.standaloneNN import inputs, parameters, loss
-import jax
-interpret = Interpreter()
+from src.site_packages.custom_interpreter.api import scalar_interpret, interval_interpret
+
 
 scalar_x, ival_x = inputs()
 params = parameters()
 y = loss(scalar_x, params)
+
 print(y)
 print("-"*50)
 
-expr = jax.make_jaxpr(loss)(scalar_x, params)
-y = interpret.safe_interpret(expr.jaxpr, expr.literals, scalar_x, params)
-print(y)
-
-expr = jax.make_jaxpr(jax.jacfwd(loss))(scalar_x, params)
-y = interpret.safe_interpret(expr.jaxpr, expr.literals, scalar_x, params)
-print(y)
+y = scalar_interpret(loss)(input_parameters=scalar_x, model_parameters=params)
+y = interval_interpret(loss)(ival_x, scalar_x, params)
 
