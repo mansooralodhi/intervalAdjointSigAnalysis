@@ -182,13 +182,12 @@ class IntervalArithmetic():
             return self.np_like.squeeze(a[0], axis=dimensions), self.np_like.squeeze(a[1], axis=dimensions)
         return self.np_like.squeeze(a, axis=dimensions)
 
-    def pad(self, a: Union[NDArrayLike, IntervalLike], pad_width, padding_config=None) -> Union[
+    def pad(self, a: Union[NDArrayLike, IntervalLike], padding_value, padding_config=None) -> Union[
         NDArrayLike, IntervalLike]:
-        # fixme: use the padding_config in kwargs to correctly configure the padding.
-        pad_width = pad_width.astype(self.np_like.int32)
         if self._is_interval(a):
-            return self.np_like.pad(a[0], pad_width), self.np_like.pad(a[1], pad_width)
-        return self.np_like.pad(a, pad_width)
+            return utils.lax2numpy_pad(self.np_like, a[0], padding_config, padding_value), \
+                   utils.lax2numpy_pad(self.np_like, a[1], padding_config, padding_value)
+        return utils.lax2numpy_pad(self.np_like, a, padding_config, padding_value)
 
     def broadcast_in_dim(self, a: Union[NDArrayLike, IntervalLike], *args, **kwargs):
         if self._is_interval(a):

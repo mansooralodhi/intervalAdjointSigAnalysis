@@ -33,6 +33,8 @@ from src.interpreter.registry import registry
 from jax.custom_derivatives import custom_vjp_call_p, custom_vjp_call_jaxpr_p
 from jax.custom_derivatives import custom_jvp_call_p
 
+import collections
+from jax.core import Literal
 
 
 class Interpreter(object):
@@ -40,7 +42,7 @@ class Interpreter(object):
     def __init__(self):
         self.registry = registry()
 
-    def safe_interpret(self, jaxpr: jax.make_jaxpr, consts: list, args: list | tuple) -> object:
+    def safe_interpret(self, jaxpr: jax.make_jaxpr, literals: list, args: list | tuple) -> object:
         """
         jaxpr attributes:
             constvars | invars | eqns (iterated) | outvars (ignored)
@@ -61,7 +63,7 @@ class Interpreter(object):
 
         # iteratively calls write function for each element of len(const)
         safe_map(write, jaxpr.invars, args)
-        safe_map(write, jaxpr.constvars, consts)
+        safe_map(write, jaxpr.constvars, literals)
 
         for eqn in jaxpr.eqns:
 
@@ -96,6 +98,34 @@ class Interpreter(object):
         output = safe_map(read, jaxpr.outvars)
         return output
 
+    def unsafe_interpreter(self, jaxpr, literals, inputs):
+        env = collections.defaultdict(lambda: 0.0)
+
+        def read(var):
+            if isinstance(var, Literal):
+                return var.val
+            return env[var]
+
+        def write(var, val):
+            env[var] = val
+
+        # Initialize environment with inputs and literals
+        for var, val in zip(jaxpr.invars, inputs + literals):
+            write(var, val)
+
+        # Process each equation
+        for eqn in jaxpr.eqns:
+            invals = [read(var) for var in eqn.invars]
+            if eqn.primitive in self.registry:
+                outvals = self.registry[eqn.primitive](*invals, **eqn.params)
+            if not isinstance(outvals, tuple):
+                outvals = (outvals,)
+            for var, val in zip(eqn.outvars, outvals):
+                write(var, val)
+
+        # Collect gradients
+        grads = [env[var] for var in jaxpr.outvars]
+        return grads
 
 
 if __name__ == "__main__":
