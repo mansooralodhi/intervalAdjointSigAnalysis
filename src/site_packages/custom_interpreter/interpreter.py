@@ -31,7 +31,8 @@ from jax.experimental.pjit import pjit_p
 from src.site_packages.custom_interpreter.registry import registry
 from jax.custom_derivatives import custom_vjp_call_p, custom_vjp_call_jaxpr_p, custom_jvp_call_p
 
-from typing import Union
+from copy import deepcopy
+from typing import Union, Literal
 from src.site_packages.interval_arithmetic.numpyLike import Interval, NDArray
 
 
@@ -54,7 +55,6 @@ def safe_interpreter(jaxpr: jax.make_jaxpr, literals: list, *args: Union[Interva
         val = vars.val if type(vars) is jax.core.Literal else env[vars]
         return val
 
-    # iteratively calls write function for each element of len(const)
     safe_map(write, jaxpr.invars, args)
     safe_map(write, jaxpr.constvars, literals)
 
@@ -86,7 +86,83 @@ def safe_interpreter(jaxpr: jax.make_jaxpr, literals: list, *args: Union[Interva
         safe_map(write, eqn.outvars, outVarValues)
 
     output = safe_map(read, jaxpr.outvars)
+
     return output
+
+
+def _safe_interpreter(jaxpr: jax.make_jaxpr, literals: list, *args: Union[Interval, NDArray]) -> object:
+    # fixme:    the current method tracks intermediate primals output wrt to all args,
+    #           integrate it with api using a flat.
+
+    """
+    jaxpr attributes:
+        constvars | invars | eqns (iterated) | outvars (ignored)
+    consts:
+        list of static params/weights
+    args:
+        list[...]
+        len(args) == len(jaxpr.invars)
+    """
+    env = {}
+
+    def write(vars, args):
+        env[vars] = args
+
+    def read(vars):
+        val = vars.val if type(vars) is jax.core.Literal else env[vars]
+        return val
+
+    safe_map(write, jaxpr.invars, args)
+    safe_map(write, jaxpr.constvars, literals)
+
+    env_custom = {}
+    intermediate_outputs = []
+
+    def write_custom(vars, args):
+        env_custom[vars] = args
+
+
+    # iteratively calls write function for each element of len(const)
+    safe_map(write_custom, jaxpr.invars, args)  # store the initial input vector, X
+    safe_map(write_custom, jaxpr.constvars, literals)
+    intermediate_outputs.append(args[0])
+
+    for eqn in jaxpr.eqns:
+
+        inVarValues = safe_map(read, eqn.invars)
+
+        if eqn.primitive in [custom_vjp_call_p, custom_jvp_call_p]:
+            sub_closedJaxpr = eqn.params['call_jaxpr']
+            outVarValues = safe_interpreter(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
+            outVarValues = outVarValues if isinstance(outVarValues, list | tuple) else [outVarValues]
+
+        elif eqn.primitive == custom_vjp_call_jaxpr_p:
+            sub_closedJaxpr = eqn.params['fun_jaxpr']
+            outVarValues = safe_interpreter(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
+            outVarValues = outVarValues if isinstance(outVarValues, list | tuple) else [outVarValues]
+
+        elif eqn.primitive == pjit_p:
+            sub_closedJaxpr = eqn.params['jaxpr']
+            outVarValues = safe_interpreter(sub_closedJaxpr.jaxpr, sub_closedJaxpr.literals, *inVarValues)
+            outVarValues = outVarValues if isinstance(outVarValues, list | tuple) else [outVarValues]
+
+        elif eqn.primitive in registry:
+            outVarValues = [registry[eqn.primitive](*inVarValues, **eqn.params)]
+
+        else:
+            raise NotImplementedError(f"{eqn.primitive} does not have registered interval equivalent.")
+
+        safe_map(write, eqn.outvars, outVarValues)
+        # todo: if inVarValues in env_custom then add the output in intermediate_outputs
+        for argId in env_custom.keys():
+            if argId in eqn.invars:
+                intermediate_outputs.append(*outVarValues)
+                break
+
+    output = safe_map(read, jaxpr.outvars)
+
+    return output, intermediate_outputs
+
 
 
 if __name__ == "__main__":
